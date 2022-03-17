@@ -43,8 +43,27 @@
                 counter.textContent = `${currentCount}`;
                 break;
             case 'updateResponse':
+                const LINE = 0
+                const COL = 1
+                const VAL = 2
+
                 const data = message.data;
-                refacState.textContent = data.response;
+                const prefix = "vscode://file//" + data.file;
+                const origins = data.origins;
+
+                for (const origin of origins) {
+                    let p = document.createElement('p')
+                    let a = document.createElement('a')
+                    a.href = prefix + ':' + origin[LINE] + ':' + origin[COL]
+                    a.innerHTML = a.href + " ~ Possible value: " + origin[VAL]
+
+                    p.appendChild(a)
+
+
+                    refacState.appendChild(p)
+                }
+
+                //refacState.textContent = "hello";
                 break;
         }
     });

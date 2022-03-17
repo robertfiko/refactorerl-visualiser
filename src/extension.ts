@@ -247,9 +247,13 @@ class CatCodingPanel {
 			<body>
 				<h1>Hello ELTE!</h1>
 				<h1 id="lines-of-code-counter">0</h1>
-				<h3>Response: <span id="response"></span></h3>
+				<h3>Response: </h3>
+				<div id="response">
+				</div>
 				<p id="refac">~~PLACHOLDER~~</p>
 				<p id="ws">NO INFO</p>
+
+				<a href="vscode://file///Users/fikorobert/Projects/ELS_Referl/els_dev/unused.erl:20:12">Example link</a>
 
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
