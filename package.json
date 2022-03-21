@@ -16,24 +16,52 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:catCoding.start",
-		"onCommand:catCoding.doRefactor",
-		"onWebviewPanel:catCoding"
+		"onView:variableOrigin",
+		"onCommand:refactorErl.start",
+		"onCommand:refactorErl.doRefactor",
+		"onWebviewPanel:refactorErl"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "catCoding.start",
-				"title": "Start cat coding session",
-				"category": "Cat Coding"
+				"command": "refactorErl.start", 
+				"title": "RefactorErl Visualizer",
+				"category": "RefactorErl"
 			},
 			{
-				"command": "catCoding.doRefactor",
+				"command": "refactorErl.doRefactor",
 				"title": "Do some refactoring",
-				"category": "Cat Coding"
+				"category": "RefactorErl"
 			}
-		]
+		],
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "refactorerl",
+					"title": "RefactorErl",
+					"icon": "media/erlang.svg"
+				}
+			]
+		  },
+		  "views": {
+			"refactorerl": [
+				{
+					"id": "variableOrigin",
+					"name": "Variable Origin",
+					"icon": "media/dep.svg",
+					"contextualTitle": "RefactorErl"
+				},
+				{
+					"id": "testview",
+					"name": "Test View"
+				},
+				{
+					"id": "testview",
+					"name": "Test View"
+				}
+			]
+		  }
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

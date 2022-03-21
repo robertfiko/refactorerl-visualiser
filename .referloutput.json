@@ -1,3 +1,20 @@
 {
-	"alma": "hello"
+	"origins": [
+		[
+			16,
+			5,
+			"\"Korte\""
+		],
+		[
+			19,
+			3,
+			"A"
+		],
+		[
+			20,
+			12,
+			"A"
+		]
+	],
+	"file": "/Users/fikorobert/Projects/ELS_Referl/els_dev/unused.erl"
 }
