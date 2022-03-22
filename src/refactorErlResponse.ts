@@ -3,19 +3,9 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 
-export class ReferlOutput {
+export class RefactorErlResponse {
 	private exsits: boolean;
 	private data: any;
-
-	private updateJSON(): void {
-		const JsonString = fs.readFileSync(this.uri.fsPath, 'utf8');
-		this.data = JSON.parse(JsonString);
-		vscode.window.showInformationMessage("JSON updated!");
-	}
-
-	private valid(): boolean {
-		return this.data != undefined;
-	}
 
 	constructor(private uri: Uri) {
 		const watcher = vscode.workspace.createFileSystemWatcher(uri.fsPath);
@@ -35,11 +25,21 @@ export class ReferlOutput {
 		});
 	}
 
-	public origins(): ReferlOrigin[] {
+	private updateJSON(): void {
+		const JsonString = fs.readFileSync(this.uri.fsPath, 'utf8');
+		this.data = JSON.parse(JsonString);
+		vscode.window.showInformationMessage("JSON updated!");
+	}
+
+	private valid(): boolean {
+		return this.data != undefined;
+	}
+
+	public origins(): ReferlOriginDescriptor[] {
 		if (this.valid()) {
-			const origins: ReferlOrigin[] = [];
+			const origins: ReferlOriginDescriptor[] = [];
 			for (const rawOrigin of this.data.origins) {
-				origins.push(new ReferlOrigin(rawOrigin, this.file()));
+				origins.push(new ReferlOriginDescriptor(rawOrigin, this.file()));
 			}
 			return origins;
 		}
@@ -59,7 +59,7 @@ export class ReferlOutput {
 }
 
 
-export class ReferlOrigin {
+export class ReferlOriginDescriptor {
 	public readonly from: vscode.Position;
 	public readonly to: vscode.Position;
 	public readonly value: string;

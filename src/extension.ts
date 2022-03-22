@@ -1,8 +1,8 @@
 import { readFile } from 'fs';
 import * as vscode from 'vscode';
 import { RefactorErlView } from './refactorErlView';
-import { ReferlOrigin, ReferlOutput } from './referlOutput';
-import { VariableOriginProvider, OriginItem } from './variableOrigin';
+import { ReferlOriginDescriptor, RefactorErlResponse } from './refactorErlResponse';
+import { VariableOriginProvider, OriginLocationTreeItem } from './variableOrigin';
 
 
 export function activate(context: vscode.ExtensionContext) {
@@ -17,49 +17,14 @@ export function activate(context: vscode.ExtensionContext) {
 	// If there is an opened workspace, than activate
 	if (workspaceUri) {
 		const outputFilePath = vscode.Uri.joinPath(workspaceUri, outputFileName);
-		const referloutput = new ReferlOutput(outputFilePath);
+		const referloutput = new RefactorErlResponse(outputFilePath);
 
 		const variableOriginProvider = new VariableOriginProvider(rootPath, referloutput);
 		vscode.window.registerTreeDataProvider('variableOrigin', variableOriginProvider);
-		//vscode.commands.registerCommand('variableOrigin.refreshEntry', () => variableOriginProvider.refresh());
-		//vscode.commands.registerCommand('extension.openPackageOnNpm', moduleName => vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`https://www.npmjs.com/package/${moduleName}`)));
-		//vscode.commands.registerCommand('variableOrigin.addEntry', () => vscode.window.showInformationMessage(`Successfully called add entry.`));
-		//vscode.commands.registerCommand('variableOrigin.editEntry', (node: OriginItem) => vscode.window.showInformationMessage(`Successfully called edit entry on ${node.label}.`));
-		//vscode.commands.registerCommand('variableOrigin.deleteEntry', (node: OriginItem) => vscode.window.showInformationMessage(`Successfully called delete entry on ${node.label}.`));
-
-		const borderDecoration = vscode.window.createTextEditorDecorationType({
-			borderWidth: '1px',
-			borderStyle: 'solid',
-			overviewRulerColor: 'blue',
-			overviewRulerLane: vscode.OverviewRulerLane.Right,
-			light: {
-				borderColor: 'darkblue'
-			},
-			dark: {
-				borderColor: 'lightblue'
-			}
-		});
 
 
 		context.subscriptions.push(
-			vscode.commands.registerCommand('variableOrigin.sayhello', (origin: ReferlOrigin) => {
-				const uri = vscode.Uri.file(origin.file);
-				vscode.commands.executeCommand('vscode.open', uri);
-
-				const activeEditor = vscode.window.activeTextEditor;
-				if (activeEditor) {
-					const range = new vscode.Range(origin.from, origin.to);
-
-					const decoration = { range: range, hoverMessage: 'Possible value' };
-					activeEditor.setDecorations(borderDecoration, [decoration]);
-
-					const position = activeEditor.selection.active;
-			
-					const newSelection = new vscode.Selection(origin.from, origin.from);
-					activeEditor.selection = newSelection;
-				}
-
-			})
+			vscode.commands.registerCommand('variableOrigin', (origin: ReferlOriginDescriptor) => VariableOriginProvider.selectOriginItem(origin))
 		);
 
 		context.subscriptions.push(

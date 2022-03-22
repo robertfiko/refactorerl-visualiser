@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getNonce = exports.getWebviewOptions = exports.activate = void 0;
 const vscode = require("vscode");
 const refactorErlView_1 = require("./refactorErlView");
-const referlOutput_1 = require("./referlOutput");
+const refactorErlResponse_1 = require("./refactorErlResponse");
 const variableOrigin_1 = require("./variableOrigin");
 function activate(context) {
     const outputFileName = "/.referloutput.json";
@@ -14,39 +14,10 @@ function activate(context) {
     // If there is an opened workspace, than activate
     if (workspaceUri) {
         const outputFilePath = vscode.Uri.joinPath(workspaceUri, outputFileName);
-        const referloutput = new referlOutput_1.ReferlOutput(outputFilePath);
+        const referloutput = new refactorErlResponse_1.RefactorErlResponse(outputFilePath);
         const variableOriginProvider = new variableOrigin_1.VariableOriginProvider(rootPath, referloutput);
         vscode.window.registerTreeDataProvider('variableOrigin', variableOriginProvider);
-        //vscode.commands.registerCommand('variableOrigin.refreshEntry', () => variableOriginProvider.refresh());
-        //vscode.commands.registerCommand('extension.openPackageOnNpm', moduleName => vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(`https://www.npmjs.com/package/${moduleName}`)));
-        //vscode.commands.registerCommand('variableOrigin.addEntry', () => vscode.window.showInformationMessage(`Successfully called add entry.`));
-        //vscode.commands.registerCommand('variableOrigin.editEntry', (node: OriginItem) => vscode.window.showInformationMessage(`Successfully called edit entry on ${node.label}.`));
-        //vscode.commands.registerCommand('variableOrigin.deleteEntry', (node: OriginItem) => vscode.window.showInformationMessage(`Successfully called delete entry on ${node.label}.`));
-        const borderDecoration = vscode.window.createTextEditorDecorationType({
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            overviewRulerColor: 'blue',
-            overviewRulerLane: vscode.OverviewRulerLane.Right,
-            light: {
-                borderColor: 'darkblue'
-            },
-            dark: {
-                borderColor: 'lightblue'
-            }
-        });
-        context.subscriptions.push(vscode.commands.registerCommand('variableOrigin.sayhello', (origin) => {
-            const uri = vscode.Uri.file(origin.file);
-            vscode.commands.executeCommand('vscode.open', uri);
-            const activeEditor = vscode.window.activeTextEditor;
-            if (activeEditor) {
-                const range = new vscode.Range(origin.from, origin.to);
-                const decoration = { range: range, hoverMessage: 'Possible value' };
-                activeEditor.setDecorations(borderDecoration, [decoration]);
-                const position = activeEditor.selection.active;
-                const newSelection = new vscode.Selection(origin.from, origin.from);
-                activeEditor.selection = newSelection;
-            }
-        }));
+        context.subscriptions.push(vscode.commands.registerCommand('variableOrigin', (origin) => variableOrigin_1.VariableOriginProvider.selectOriginItem(origin)));
         context.subscriptions.push(vscode.commands.registerCommand('refactorErl.start', () => {
             refactorErlView_1.RefactorErlView.createOrShow(context.extensionUri);
         }));
