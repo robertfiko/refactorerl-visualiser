@@ -25,13 +25,18 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "refactorErl.start", 
+				"command": "refactorErl.start",
 				"title": "RefactorErl Visualizer",
 				"category": "RefactorErl"
 			},
 			{
 				"command": "refactorErl.doRefactor",
 				"title": "Do some refactoring",
+				"category": "RefactorErl"
+			},
+			{
+				"command": "variableOrigin.sayhello",
+				"title": "Sayhello",
 				"category": "RefactorErl"
 			}
 		],
@@ -43,8 +48,8 @@
 					"icon": "media/erlang.svg"
 				}
 			]
-		  },
-		  "views": {
+		},
+		"views": {
 			"refactorerl": [
 				{
 					"id": "variableOrigin",
@@ -53,15 +58,15 @@
 					"contextualTitle": "RefactorErl"
 				},
 				{
-					"id": "testview",
-					"name": "Test View"
+					"id": "testview2",
+					"name": "Test View2"
 				},
 				{
 					"id": "testview",
 					"name": "Test View"
 				}
 			]
-		  }
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

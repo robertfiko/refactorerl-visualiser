@@ -3,7 +3,6 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 
-
 export class ReferlOutput {
 	private exsits: boolean;
 	private data: any;
@@ -36,12 +35,49 @@ export class ReferlOutput {
 		});
 	}
 
-	public origins() {
+	public origins(): ReferlOrigin[] {
 		if (this.valid()) {
-			return this.data.origins;
+			const origins: ReferlOrigin[] = [];
+			for (const rawOrigin of this.data.origins) {
+				origins.push(new ReferlOrigin(rawOrigin, this.file()));
+			}
+			return origins;
 		}
 		else {
 			return [];
 		}
 	}
+
+	public file(): string {
+		if (this.valid()) {
+			return this.data.file;
+		}
+		else {
+			return "";
+		}
+	}
 }
+
+
+export class ReferlOrigin {
+	public readonly from: vscode.Position;
+	public readonly to: vscode.Position;
+	public readonly value: string;
+	public readonly file: string;
+
+	constructor (rawOrigin: [number, number, number, number, string], file: string)  {
+		this.from = new vscode.Position(rawOrigin[0]-1, rawOrigin[1]-1);
+		this.to = new vscode.Position(rawOrigin[2]-1, rawOrigin[3]);
+		this.value = rawOrigin[4];
+		this.file = file;
+	}
+
+}
+
+
+/*
+
+origins,
+file
+
+*/
