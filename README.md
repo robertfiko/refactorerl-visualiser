@@ -1,34 +1,17 @@
-# Cat Coding — A Webview API Sample
+# RefactorErl visualiser
 
-Demonstrates VS Code's [webview API](https://code.visualstudio.com/api/extension-guides/webview). This includes:
+## Prerequisites
+- `npm install -g vsce`
+- The `code` command: 
+	- Mac OS: https://code.visualstudio.com/docs/setup/mac#_launching-from-the-command-line 
+	- Windows: (tip section) https://code.visualstudio.com/docs/setup/windows#_installation
 
-- Creating and showing a basic webview.
-- Dynamically updating a webview's content.
-- Loading local content in a webview.
-- Running scripts in a webview.
-- Sending message from an extension to a webview.
-- Sending messages from a webview to an extension.
-- Using a basic content security policy.
-- Webview lifecycle and handling dispose.
-- Saving and restoring state when the panel goes into the background.
-- Serialization and persistence across VS Code reboots.
 
-## Demo
+## Install
 
-![demo](demo.gif)
+1. Clone the repository
+2. `vsce package`
+3. `code --install-extension <produced_vsix_file> --force`
 
-## VS Code API
-
-### `vscode` module
-
-- [`window.createWebviewPanel`](https://code.visualstudio.com/api/references/vscode-api#window.createWebviewPanel)
-- [`window.registerWebviewPanelSerializer`](https://code.visualstudio.com/api/references/vscode-api#window.registerWebviewPanelSerializer)
-
-## Running the example
-
-- Open this example in VS Code 1.47+
-- `npm install`
-- `npm run watch` or `npm run compile`
-- `F5` to start debugging
-
-Run the `Cat Coding: Start cat coding session` to create the webview.
+## Ununstall
+ `code --uninstall-extension robert-fiko.refactorerl-visualizer --force`
