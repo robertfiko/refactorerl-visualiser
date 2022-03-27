@@ -1,13 +1,13 @@
 {
-	"name": "cat-coding",
-	"description": "Cat Coding - A Webview API Sample",
+	"name": "refactorerl-visualizer",
+	"description": "Visualiser for RefactorErl",
 	"version": "0.0.1",
-	"publisher": "vscode-samples",
+	"publisher": "robert-fiko",
 	"private": true,
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Microsoft/vscode-extension-samples"
+		"url": "https://github.com/robertfiko/refactorerl-visualiser"
 	},
 	"engines": {
 		"vscode": "^1.47.0"
