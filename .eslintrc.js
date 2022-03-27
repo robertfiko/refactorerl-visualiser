@@ -11,7 +11,8 @@ module.exports = {
 		'plugin:@typescript-eslint/recommended',
 	],
 	ignorePatterns: [
-		'media'
+		'media',
+		'vscode-els-referl'
 	],
 	rules: {
 		'semi': [2, "always"],
