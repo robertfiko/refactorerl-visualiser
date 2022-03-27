@@ -6,6 +6,8 @@ import * as fs from 'fs';
 export class RefactorErlResponse {
 	private exsits: boolean;
 	private data: any;
+	private callOnUpdateJSON: (() => void)[];
+	//private updateJsonEvent: EventTarget;
 
 	constructor(private uri: Uri) {
 		const watcher = vscode.workspace.createFileSystemWatcher(uri.fsPath);
@@ -23,12 +25,22 @@ export class RefactorErlResponse {
 		watcher.onDidChange(() => {
 			this.updateJSON();
 		});
+
+		this.callOnUpdateJSON = [];
 	}
 
 	private updateJSON(): void {
 		const JsonString = fs.readFileSync(this.uri.fsPath, 'utf8');
 		this.data = JSON.parse(JsonString);
 		vscode.window.showInformationMessage("JSON updated!");
+		for (const fun of this.callOnUpdateJSON) {
+			//fun();
+			//vscode.window.showInformationMessage("1!");
+		}
+	}
+
+	public subscribeToUpdateJSON(fun: () => void) {
+		this.callOnUpdateJSON.push(fun);
 	}
 
 	private valid(): boolean {

@@ -24,7 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 		context.subscriptions.push(
-			vscode.commands.registerCommand('variableOrigin', (origin: ReferlOriginDescriptor) => VariableOriginProvider.selectOriginItem(origin))
+			vscode.commands.registerCommand('variableOrigin.goToLocation', (origin: ReferlOriginDescriptor) => VariableOriginProvider.selectOriginItem(origin))
 		);
 
 		context.subscriptions.push(
