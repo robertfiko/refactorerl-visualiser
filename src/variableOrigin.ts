@@ -8,7 +8,7 @@ export class VariableOriginProvider implements vscode.TreeDataProvider<VariableO
 	readonly onDidChangeTreeData: vscode.Event<OriginLocationTreeItem | undefined | void> = this._onDidChangeTreeData.event;
 
 	constructor(private workspaceRoot: string | undefined, private referloutput: RefactorErlResponse) {
-		this.referloutput.subscribeToUpdateJSON(this.refresh);
+		this.referloutput.subscribeToUpdateJSON(() => {this.refresh();});
 	}
 
 	getTreeItem(element: OriginLocationTreeItem): vscode.TreeItem {
@@ -41,7 +41,6 @@ export class VariableOriginProvider implements vscode.TreeDataProvider<VariableO
 
 	refresh(): void {
 		this._onDidChangeTreeData.fire(undefined);
-		vscode.window.showInformationMessage("JSON updated!2");
 	}
 
 	private static readonly borderDecoration = vscode.window.createTextEditorDecorationType({

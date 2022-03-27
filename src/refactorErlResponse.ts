@@ -1,4 +1,4 @@
-import { Uri } from "vscode";
+import { Disposable, Uri } from "vscode";
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
@@ -32,10 +32,8 @@ export class RefactorErlResponse {
 	private updateJSON(): void {
 		const JsonString = fs.readFileSync(this.uri.fsPath, 'utf8');
 		this.data = JSON.parse(JsonString);
-		vscode.window.showInformationMessage("JSON updated!");
 		for (const fun of this.callOnUpdateJSON) {
-			//fun();
-			//vscode.window.showInformationMessage("1!");
+			fun();
 		}
 	}
 
@@ -85,6 +83,8 @@ export class ReferlOriginDescriptor {
 	}
 
 }
+
+
 
 
 /*
