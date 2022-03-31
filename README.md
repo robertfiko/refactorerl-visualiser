@@ -33,8 +33,23 @@ _Note:_ if you just want to package (create) the `.vsix` file use `make compile-
 
  ### Erlang LS config file
  
- ...
+ Your Erlang LS config file should contain these parts to work with RefactorErl and its visualiser
+ 
+```
+diagnostics:
+  enabled:
+    - refactorerl
+
+refactorerl:
+  node: "nodeName@hostName" 		
+  diagnostics:
+    - "unused_macros"			
+    - "unsecure_os_call"
+
+```
+
+Under diagnostics you need to list the ones you would like to run.
 
  ### RefactorErl
 
- You need to start RefactorErl....
+ You need to start RefactorErl with `-sname`
