@@ -25,7 +25,8 @@ _Note:_ if you just want to package (create) the `.vsix` file use `make compile-
  `code --uninstall-extension robert-fiko.refactorerl-visualizer --force`
 
  ## Install: RefactorErl 
- **WARNING! The current release is not containing the neccessary interface code!**
+ **WARNING! The current release is not containing the neccessary interface code!*
+ 
  Download RefactorErl from here and follow the neccessary installing actions. [https://plc.inf.elte.hu/erlang/refactorerl-releases.html](https://plc.inf.elte.hu/erlang/refactorerl-releases.html)
 
  ## Getting everything together
