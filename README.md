@@ -14,7 +14,7 @@ RefactorErl visualiser is a Visual Studio Code plugin, which works well with Erl
 ## Install: Erlang LS with RefactorErl interface code
 
 1. Clone the repository
-2. `make refels` _(this will create a `.vsix` file, what you need to install)_
+2. `make refels` _(this will create a `.vsix` file, and install it)_
 
 _Note:_ if you just want to package (create) the `.vsix` file use `make compile-refels`
 
