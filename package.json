@@ -17,6 +17,7 @@
 	],
 	"activationEvents": [
 		"onView:variableOrigin",
+		"onView:referlDashboard",
 		"onCommand:refactorErl.start",
 		"onCommand:refactorErl.doRefactor",
 		"onWebviewPanel:refactorErl"
@@ -52,21 +53,31 @@
 		"views": {
 			"refactorerl": [
 				{
-					"id": "variableOrigin",
-					"name": "Variable Origin",
+					"id": "referlDashboard",
+					"name": "RefactorErl dashboard",
 					"icon": "media/dep.svg",
 					"contextualTitle": "RefactorErl"
 				},
 				{
-					"id": "testview2",
-					"name": "Test View2"
-				},
-				{
-					"id": "testview",
-					"name": "Test View"
+					"id": "variableOrigin",
+					"name": "Variable Origin"
 				}
 			]
-		}
+		},
+
+		"viewsWelcome": [
+			{
+			  "view": "referlDashboard",
+			  "contents": "RefactorErl: 🟢  Online",
+			  "when": "refactorErl.nodeReachable"
+			},
+			{
+				"view": "referlDashboard",
+				"contents": "RefactorErl: 🔴  Not reachable \n RefactorErl is using WebSocket, to deliver content: [learn more](https://www.google.com/).\n[Try again](command:nodeDependencies.addEntry)",
+				"when": "!refactorErl.nodeReachable"
+			  }
+		  ]
+
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
@@ -78,9 +89,13 @@
 		"@types/node": "^12.12.0",
 		"@types/vscode": "^1.47.0",
 		"@types/vscode-webview": "^1.57.0",
+		"@types/ws": "^8.5.3",
 		"@typescript-eslint/eslint-plugin": "^4.16.0",
 		"@typescript-eslint/parser": "^4.16.0",
 		"eslint": "^7.21.0",
 		"typescript": "^4.5.5"
+	},
+	"dependencies": {
+		"ws": "^8.5.0"
 	}
 }

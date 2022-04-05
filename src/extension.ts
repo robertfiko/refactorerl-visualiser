@@ -3,9 +3,14 @@ import * as vscode from 'vscode';
 import { RefactorErlView } from './refactorErlView';
 import { ReferlOriginDescriptor, RefactorErlResponse } from './refactorErlResponse';
 import { VariableOriginProvider, OriginLocationTreeItem } from './variableOrigin';
+import * as WebSocket from 'ws';
 
 
 export function activate(context: vscode.ExtensionContext) {
+	let WebSocketOnline = false;
+
+	
+
 
 	const outputFileName = "/.referloutput.json";
 	const rootPath = (vscode.workspace.workspaceFolders && (vscode.workspace.workspaceFolders.length > 0))
@@ -52,6 +57,8 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 			})
 		);
+
+		vscode.commands.executeCommand('setContext', 'refactorErl.nodeReachable', WebSocketOnline);
 	}
 
 }
