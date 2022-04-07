@@ -2,3 +2,4 @@ out/**
 .referloutput.json
 *.vsix
 node_modules/**
+.DS_Store
