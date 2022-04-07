@@ -1,29 +1,48 @@
 import { WebSocket } from "ws";
+import * as vscode from 'vscode';
 
-/**
- * The Singleton class defines the `getInstance` method that lets clients access
- * the unique singleton instance.
- */
-class WebSocketHandler {
+export class WebSocketHandler {
 	private static instance: WebSocketHandler;
 	private socket: WebSocket;
 	private socketOnline: boolean;
+	private subs: Map<string, ((param: any) => void)[]>;
+	private uri: string;
 
-	private constructor() { //TODO: Handle if the browser is not supporting WS
+	private constructor() {
 		this.socketOnline = false;
-		this.socket = new WebSocket('ws://127.0.0.1:8002/vsc_api.yaws');
-		this.socket.addEventListener('open', function (event) {
-			this.socketOnline = true;
-			vscode.commands.executeCommand('setContext', 'refactorErl.nodeReachable', WebSocketOnline);
-			socket.send('client-connected');
+		this.subs = new Map<string, ((param: any) => void)[]>();
+		this.uri = 'ws://127.0.0.1:8002/vsc_api.yaws';
+		
+		this.socket = new WebSocket(this.uri);
+		this.connect();
 
-		});
+	}
 
-		socket.onmessage = function (event) {
-			if (typeof event.data === 'string' || event.data instanceof String) {
-				vscode.window.showWarningMessage(String(event.data));
-			}
-		};
+	public connect() {
+		if (!this.socketOnline) {
+			this.socket = new WebSocket(this.uri);
+			this.socket.addEventListener('open', (event) => {
+				this.socketOnline = true;
+				vscode.commands.executeCommand('setContext', 'refactorErl.nodeReachable', this.socketOnline);
+				this.socket.send('client-connected');
+
+			});
+
+			this.socket.onmessage = (eventStream) => {
+				const streamObject = JSON.parse(String(eventStream.data));
+				const event = streamObject.event;
+				const data = streamObject.data;
+
+				const subsFuns = this.subs.get(event);
+				if (subsFuns != undefined && subsFuns.length > 0) {
+					for (const fun of subsFuns) {
+						fun(data);
+					}
+				}
+			};
+
+			this.subscribe("error", (data) => { vscode.window.showErrorMessage("Error: " + String(data)); });
+		}
 	}
 
 	public static getInstance(): WebSocketHandler {
@@ -32,6 +51,16 @@ class WebSocketHandler {
 		}
 
 		return WebSocketHandler.instance;
+	}
+
+	public subscribe(event: string, fun: (param: any) => void) {
+		if (this.subs.has(event)) {
+			this.subs.get(event)?.push(fun);
+		}
+		else {
+			this.subs.set(event, [fun]);
+		}
+
 	}
 
 

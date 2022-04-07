@@ -1,14 +1,13 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { ReferlOriginDescriptor, RefactorErlResponse } from './refactorErlResponse';
-
 export class VariableOriginProvider implements vscode.TreeDataProvider<VariableOriginTreeItem> {
 
 	private _onDidChangeTreeData: vscode.EventEmitter<OriginLocationTreeItem | undefined | void> = new vscode.EventEmitter<OriginLocationTreeItem | undefined | void>();
 	readonly onDidChangeTreeData: vscode.Event<OriginLocationTreeItem | undefined | void> = this._onDidChangeTreeData.event;
+	private data: VarialbeOriginDataStorage;
 
-	constructor(private workspaceRoot: string | undefined, private referloutput: RefactorErlResponse) {
-		this.referloutput.subscribeToUpdateJSON(() => {this.refresh();});
+	constructor() {
+		this.data = new VarialbeOriginDataStorage;
 	}
 
 	getTreeItem(element: OriginLocationTreeItem): vscode.TreeItem {
@@ -16,13 +15,13 @@ export class VariableOriginProvider implements vscode.TreeDataProvider<VariableO
 	}
 
 	getChildren(element?: VariableOriginTreeItem): Thenable<VariableOriginTreeItem[]> {
-		const file = this.referloutput.file();
+		const file = this.data.file();
 		const module = path.basename(file);
 
 		// Filling up children
 		if (element) {
 			const parent = element.label;
-			const origins = this.referloutput.origins();
+			const origins = this.data.origins();
 			const items = new Array<OriginLocationTreeItem>();
 
 			for (const origin of origins) {
@@ -39,8 +38,12 @@ export class VariableOriginProvider implements vscode.TreeDataProvider<VariableO
 		}
 	}
 
-	refresh(): void {
-		this._onDidChangeTreeData.fire(undefined);
+
+	public refresh(data: any): void {
+		vscode.window.showInformationMessage("VAROR");
+		this.data.updateData(JSON.parse(data));
+		this._onDidChangeTreeData.fire(undefined); 
+
 	}
 
 	private static readonly borderDecoration = vscode.window.createTextEditorDecorationType({
@@ -56,7 +59,7 @@ export class VariableOriginProvider implements vscode.TreeDataProvider<VariableO
 		}
 	});
 
-	static selectOriginItem(origin: ReferlOriginDescriptor) {
+	static selectOriginItem(origin: OriginDescriptor) {
 		const uri = vscode.Uri.file(origin.file);
 		vscode.commands.executeCommand('vscode.open', uri);
 
@@ -98,7 +101,7 @@ export class OriginLocationTreeItem extends VariableOriginTreeItem {
 		public readonly label: string,
 		version: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-		public readonly origin: ReferlOriginDescriptor,
+		public readonly origin: OriginDescriptor,
 		public readonly command?: vscode.Command
 	) {
 		super(label, version, collapsibleState);
@@ -111,15 +114,63 @@ export class OriginLocationTreeItem extends VariableOriginTreeItem {
 	};
 }
 
-
 export class OriginCommand implements vscode.Command {
 	constructor(
 		public readonly title: string,
 		public readonly command: string,
-		origin: ReferlOriginDescriptor
+		origin: OriginDescriptor
 	) {
 		this.arguments = [origin];
 	}
 	tooltip?: string | undefined;
 	arguments?: any[] | undefined;
+}
+
+class VarialbeOriginDataStorage {
+	private data: any //JSON
+	
+	public updateData(data: any) {
+		this.data = data;
+	}
+
+	private valid(): boolean {
+		return this.data != undefined;
+	}
+
+	public origins(): OriginDescriptor[] {
+		if (this.valid()) {
+			const origins: OriginDescriptor[] = [];
+			for (const rawOrigin of this.data.origins) {
+				origins.push(new OriginDescriptor(rawOrigin, this.file()));
+			}
+			return origins;
+		}
+		else {
+			return [];
+		}
+	}
+	public file(): string {
+		if (this.valid()) {
+			return this.data.file;
+		}
+		else {
+			return "";
+		}
+	}
+
+}
+
+export class OriginDescriptor {
+	public readonly from: vscode.Position;
+	public readonly to: vscode.Position;
+	public readonly value: string;
+	public readonly file: string;
+
+	constructor (rawOrigin: [number, number, number, number, string], file: string)  {
+		this.from = new vscode.Position(rawOrigin[0]-1, rawOrigin[1]-1);
+		this.to = new vscode.Position(rawOrigin[2]-1, rawOrigin[3]);
+		this.value = rawOrigin[4];
+		this.file = file;
+	}
+
 }

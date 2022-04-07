@@ -46,7 +46,7 @@
 				{
 					"id": "refactorerl",
 					"title": "RefactorErl",
-					"icon": "media/erlang.svg"
+					"icon": "media/svg-2.svg"
 				}
 			]
 		},
@@ -73,7 +73,7 @@
 			},
 			{
 				"view": "referlDashboard",
-				"contents": "RefactorErl: 🔴  Not reachable \n RefactorErl is using WebSocket, to deliver content: [learn more](https://www.google.com/).\n[Try again](command:nodeDependencies.addEntry)",
+				"contents": "RefactorErl: 🔴  Not reachable \n RefactorErl is using WebSocket, to deliver content. It seems the connection is down. \n[Try again](command:refactorErl.checkWebSocket)",
 				"when": "!refactorErl.nodeReachable"
 			  }
 		  ]

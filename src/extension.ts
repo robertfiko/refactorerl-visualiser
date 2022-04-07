@@ -1,35 +1,30 @@
-import { readFile } from 'fs';
 import * as vscode from 'vscode';
 import { RefactorErlView } from './refactorErlView';
-import { ReferlOriginDescriptor, RefactorErlResponse } from './refactorErlResponse';
-import { VariableOriginProvider, OriginLocationTreeItem } from './variableOrigin';
-import * as WebSocket from 'ws';
-
+import { VariableOriginProvider, OriginDescriptor } from './variableOrigin';
+import { WebSocketHandler } from './webSocketHandler';
 
 export function activate(context: vscode.ExtensionContext) {
-	let WebSocketOnline = false;
-
-	
-
-
-	const outputFileName = "/.referloutput.json";
-	const rootPath = (vscode.workspace.workspaceFolders && (vscode.workspace.workspaceFolders.length > 0))
-		? vscode.workspace.workspaceFolders[0].uri.fsPath : undefined;
+	vscode.commands.executeCommand('setContext', 'refactorErl.nodeReachable', false);
+	WebSocketHandler.getInstance();
 
 	const workspaceUri = (vscode.workspace.workspaceFolders && (vscode.workspace.workspaceFolders.length > 0))
 		? vscode.workspace.workspaceFolders[0].uri : undefined;
 
 	// If there is an opened workspace, than activate
 	if (workspaceUri) {
-		const outputFilePath = vscode.Uri.joinPath(workspaceUri, outputFileName);
-		const referloutput = new RefactorErlResponse(outputFilePath);
 
-		const variableOriginProvider = new VariableOriginProvider(rootPath, referloutput);
+		const variableOriginProvider = new VariableOriginProvider();
+		WebSocketHandler.getInstance().subscribe('variableOrigin', (eventData) => { variableOriginProvider.refresh(eventData);});
+
 		vscode.window.registerTreeDataProvider('variableOrigin', variableOriginProvider);
 
 
 		context.subscriptions.push(
-			vscode.commands.registerCommand('variableOrigin.goToLocation', (origin: ReferlOriginDescriptor) => VariableOriginProvider.selectOriginItem(origin))
+			vscode.commands.registerCommand('variableOrigin.goToLocation', (origin: OriginDescriptor) => VariableOriginProvider.selectOriginItem(origin))
+		);
+
+		context.subscriptions.push(
+			vscode.commands.registerCommand('refactorErl.checkWebSocket', () => WebSocketHandler.getInstance().connect())
 		);
 
 		context.subscriptions.push(
@@ -58,7 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
 			})
 		);
 
-		vscode.commands.executeCommand('setContext', 'refactorErl.nodeReachable', WebSocketOnline);
+		
 	}
 
 }
