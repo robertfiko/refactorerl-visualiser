@@ -41,7 +41,7 @@ export class VariableOriginProvider implements vscode.TreeDataProvider<VariableO
 
 	public refresh(data: any): void {
 		vscode.window.showInformationMessage("VAROR");
-		this.data.updateData(JSON.parse(data));
+		this.data.updateData(data);
 		this._onDidChangeTreeData.fire(undefined); 
 
 	}
@@ -69,6 +69,7 @@ export class VariableOriginProvider implements vscode.TreeDataProvider<VariableO
 
 			const decoration = { range: range, hoverMessage: 'Possible value' };
 			activeEditor.setDecorations(this.borderDecoration, [decoration]);
+			activeEditor.revealRange(range, vscode.TextEditorRevealType.InCenter);
 
 			const newSelection = new vscode.Selection(origin.from, origin.from);
 			activeEditor.selection = newSelection;
