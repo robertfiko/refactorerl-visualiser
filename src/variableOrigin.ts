@@ -7,7 +7,7 @@ export class VariableOriginProvider implements vscode.TreeDataProvider<VariableO
 	private data: VarialbeOriginDataStorage;
 
 	constructor() {
-		this.data = new VarialbeOriginDataStorage;
+		this.data = new VarialbeOriginDataStorage();
 	}
 
 	getTreeItem(element: OriginLocationTreeItem): vscode.TreeItem {
@@ -17,6 +17,7 @@ export class VariableOriginProvider implements vscode.TreeDataProvider<VariableO
 	getChildren(element?: VariableOriginTreeItem): Thenable<VariableOriginTreeItem[]> {
 		const file = this.data.file();
 		const module = path.basename(file);
+		const variableName = this.data.variableName();
 
 		// Filling up children
 		if (element) {
@@ -25,7 +26,7 @@ export class VariableOriginProvider implements vscode.TreeDataProvider<VariableO
 			const items = new Array<OriginLocationTreeItem>();
 
 			for (const origin of origins) {
-				const item = new OriginLocationTreeItem(origin.value, parent, vscode.TreeItemCollapsibleState.None, origin);
+				const item = new OriginLocationTreeItem(origin.value, module, vscode.TreeItemCollapsibleState.None, origin);
 				items.push(item);
 			}
 
@@ -34,13 +35,17 @@ export class VariableOriginProvider implements vscode.TreeDataProvider<VariableO
 
 		// Module name is sent as root element
 		else {
-			return Promise.resolve([new VariableOriginTreeItem(module, "", vscode.TreeItemCollapsibleState.Collapsed)]);
+			if (module) {
+				return Promise.resolve([new VariableOriginTreeItem(variableName, "", vscode.TreeItemCollapsibleState.Collapsed)]);
+			}
+			else {
+				return Promise.resolve([]);
+			}
 		}
 	}
 
 
 	public refresh(data: any): void {
-		vscode.window.showInformationMessage("VAROR");
 		this.data.updateData(data);
 		this._onDidChangeTreeData.fire(undefined); 
 
@@ -69,7 +74,7 @@ export class VariableOriginProvider implements vscode.TreeDataProvider<VariableO
 
 			const decoration = { range: range, hoverMessage: 'Possible value' };
 			activeEditor.setDecorations(this.borderDecoration, [decoration]);
-			activeEditor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+			activeEditor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
 
 			const newSelection = new vscode.Selection(origin.from, origin.from);
 			activeEditor.selection = newSelection;
@@ -153,6 +158,15 @@ class VarialbeOriginDataStorage {
 	public file(): string {
 		if (this.valid()) {
 			return this.data.file;
+		}
+		else {
+			return "";
+		}
+	}
+
+	public variableName(): string {
+		if (this.valid()) {
+			return this.data.variableName;
 		}
 		else {
 			return "";
