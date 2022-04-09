@@ -64,20 +64,27 @@
 				}
 			]
 		},
-
 		"viewsWelcome": [
 			{
-			  "view": "referlDashboard",
-			  "contents": "RefactorErl: 🟢  Online",
-			  "when": "refactorErl.nodeReachable"
+				"view": "referlDashboard",
+				"contents": "RefactorErl: 🟢  Online",
+				"when": "refactorErl.nodeReachable"
 			},
 			{
 				"view": "referlDashboard",
 				"contents": "RefactorErl: 🔴  Not reachable \n RefactorErl is using WebSocket, to deliver content. It seems the connection is down. \n[Try again](command:refactorErl.checkWebSocket)",
 				"when": "!refactorErl.nodeReachable"
-			  }
-		  ]
+			},
+			{
+				"view": "variableOrigin",
+				"contents": "Try setting to coursor into a varialbe and use the Code Action (small lamps) to execute. \n\n The result will appear here.",
+				"when": "!refactorErl.treeViewActive"
+			}
 
+
+
+			  
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
