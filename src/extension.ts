@@ -4,6 +4,8 @@ import { VariableOriginProvider, OriginDescriptor } from './variableOrigin';
 import { WebSocketHandler } from './webSocketHandler';
 
 export function activate(context: vscode.ExtensionContext) {
+
+
 	vscode.commands.executeCommand('setContext', 'refactorErl.nodeReachable', false);
 	WebSocketHandler.getInstance();
 
@@ -14,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
 	if (workspaceUri) {
 
 		const variableOriginProvider = new VariableOriginProvider();
-		WebSocketHandler.getInstance().subscribe('variableOrigin', (eventData) => { variableOriginProvider.refresh(eventData);});
+		WebSocketHandler.getInstance().subscribe('variableOrigin', (eventData) => { variableOriginProvider.refresh(eventData); });
 
 		vscode.window.registerTreeDataProvider('variableOrigin', variableOriginProvider);
 
@@ -53,7 +55,27 @@ export function activate(context: vscode.ExtensionContext) {
 			})
 		);
 
-		
+		context.subscriptions.push(vscode.commands.registerCommand('refactorErl.query', async () => {
+			const result = await vscode.window.showInputBox({
+				placeHolder: 'Enter a query, for example: `mods.funs`',
+			});
+			if (result) {
+				vscode.window.withProgress({
+					location: vscode.ProgressLocation.Notification,
+					title: `Running: ${result} `,
+					cancellable: false
+				}, (progress) => {
+
+					const response = WebSocketHandler.getInstance().request('customQueryRequest', result);
+					response.then(
+						(value) => { progress.report({ increment: 100, message: "Done" }); console.log(value);},
+						(error) => { vscode.window.showErrorMessage(`Timeout: ${result} `);  }
+					);
+
+					return response;
+				});
+			}
+		}));
 	}
 
 }
