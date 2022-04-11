@@ -111,7 +111,7 @@ export class OriginLocationTreeItem extends VariableOriginTreeItem {
 		public readonly command?: vscode.Command
 	) {
 		super(label, version, collapsibleState);
-		this.command = new OriginCommand('Hello', 'variableOrigin.goToLocation', origin);
+		this.command = new OriginCommand('Go To Location', 'variableOrigin.goToLocation', origin);
 	}
 
 	iconPath = {

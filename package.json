@@ -39,7 +39,7 @@
 			},
 			{
 				"command": "refactorErl.query",
-				"title": "Query",
+				"title": "Custom Query",
 				"category": "RefactorErl"
 			}
 	
@@ -64,6 +64,10 @@
 				{
 					"id": "variableOrigin",
 					"name": "Variable Origin"
+				},
+				{
+					"id": "customQuery",
+					"name": "Custom Query"
 				}
 			]
 		},

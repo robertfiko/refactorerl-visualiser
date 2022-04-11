@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { CustomQueryProvider } from './customQuery';
 import { RefactorErlView } from './refactorErlView';
 import { VariableOriginProvider, OriginDescriptor } from './variableOrigin';
 import { WebSocketHandler } from './webSocketHandler';
@@ -17,16 +18,25 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const variableOriginProvider = new VariableOriginProvider();
 		WebSocketHandler.getInstance().subscribe('variableOrigin', (eventData) => { variableOriginProvider.refresh(eventData); });
-
 		vscode.window.registerTreeDataProvider('variableOrigin', variableOriginProvider);
-
-
 		context.subscriptions.push(
 			vscode.commands.registerCommand('variableOrigin.goToLocation', (origin: OriginDescriptor) => VariableOriginProvider.selectOriginItem(origin))
 		);
 
+		const customQueryProvider = new CustomQueryProvider();
+		vscode.window.registerTreeDataProvider('customQuery', customQueryProvider);
 		context.subscriptions.push(
-			vscode.commands.registerCommand('refactorErl.checkWebSocket', () => WebSocketHandler.getInstance().connect())
+			vscode.commands.registerCommand('customQuery.goToLocation', (origin: OriginDescriptor) => CustomQueryProvider.selectResultItem(origin))
+		);
+
+
+		
+
+		context.subscriptions.push(
+			vscode.commands.registerCommand('refactorErl.checkWebSocket', () => {
+				WebSocketHandler.getInstance().connect();
+				
+			})
 		);
 
 		context.subscriptions.push(
@@ -68,7 +78,22 @@ export function activate(context: vscode.ExtensionContext) {
 
 					const response = WebSocketHandler.getInstance().request('customQueryRequest', result);
 					response.then(
-						(value) => { progress.report({ increment: 100, message: "Done" }); console.log(value);},
+						(value) => {
+							if (value.status == "ok") {
+								vscode.window.showInformationMessage(`Done: ${result} `);
+								console.log(value);
+								const resp = {
+									response: value.data,
+									request: value.request,
+								};
+								customQueryProvider.refresh(resp);
+								
+							}
+							else {
+								vscode.window.showErrorMessage(`Error with request: ${result} `);
+							}
+							
+						},
 						(error) => { vscode.window.showErrorMessage(`Timeout: ${result} `);  }
 					);
 

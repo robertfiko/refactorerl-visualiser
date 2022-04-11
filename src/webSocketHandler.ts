@@ -25,13 +25,21 @@ export class WebSocketHandler {
 
 	}
 
-	public connect() {
+	/*public isOnline(): boolean {
+		return this.socketOnline;
+	}*/
+
+	public connect(callback: (() => void) | undefined = undefined) {
 		if (!this.socketOnline) {
 			this.socket = new WebSocket(this.uri);
 			this.socket.addEventListener('open', (event) => {
 				this.socketOnline = true;
 				vscode.commands.executeCommand('setContext', 'refactorErl.nodeReachable', this.socketOnline);
 				this.socket.send('client-connected');
+
+				if (callback) {
+					callback();
+				}
 
 			});
 
