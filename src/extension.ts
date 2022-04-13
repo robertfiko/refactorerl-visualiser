@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import { CustomQueryProvider } from './customQuery';
+import { RangeDescriptor } from './refactorErlTreeView';
 import { RefactorErlView } from './refactorErlView';
-import { VariableOriginProvider, OriginDescriptor } from './variableOrigin';
+import { VariableOriginProvider } from './variableOrigin';
 import { WebSocketHandler } from './webSocketHandler';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -20,13 +21,13 @@ export function activate(context: vscode.ExtensionContext) {
 		WebSocketHandler.getInstance().subscribe('variableOrigin', (eventData) => { variableOriginProvider.refresh(eventData); });
 		vscode.window.registerTreeDataProvider('variableOrigin', variableOriginProvider);
 		context.subscriptions.push(
-			vscode.commands.registerCommand('variableOrigin.goToLocation', (origin: OriginDescriptor) => VariableOriginProvider.selectOriginItem(origin))
+			vscode.commands.registerCommand('variableOrigin.goToLocation', (origin: RangeDescriptor) => VariableOriginProvider.selectOriginItem(origin))
 		);
 
 		const customQueryProvider = new CustomQueryProvider();
 		vscode.window.registerTreeDataProvider('customQuery', customQueryProvider);
 		context.subscriptions.push(
-			vscode.commands.registerCommand('customQuery.goToLocation', (origin: OriginDescriptor) => CustomQueryProvider.selectResultItem(origin))
+			vscode.commands.registerCommand('customQuery.goToLocation', (origin: RangeDescriptor) => CustomQueryProvider.selectResultItem(origin))
 		);
 
 

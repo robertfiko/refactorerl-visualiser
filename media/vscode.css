@@ -74,7 +74,7 @@ button.secondary:hover {
 }
 
 input:not([type='checkbox']),
-textarea {
+textarea, select {
 	display: block;
 	width: 100%;
 	border: none;

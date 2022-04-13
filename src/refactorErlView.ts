@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { readFileSync } from 'fs';
 import { getWebviewOptions, getNonce } from './extension';
 
 //TODO:
@@ -187,16 +188,16 @@ export class RefactorErlView {
 
 
 
+
+
+
 		//TODO: if the response is undefined
 		return `<!DOCTYPE html>
 			<html lang="en">
 			<head>
 				<meta charset="UTF-8">
 
-				<!--
-					Use a content security policy to only allow loading images from https or from our extension directory,
-					and only allow scripts that have a specific nonce.
-				-->
+				
 				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}';">
 
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -204,9 +205,33 @@ export class RefactorErlView {
 				<link href="${stylesResetUri}" rel="stylesheet">
 				<link href="${stylesMainUri}" rel="stylesheet">
 
-				<title>Cat Coding</title>
+		
 			</head>
 			<body>
+			<table>
+				<tr>
+					<th>Properties</th>
+					<th>View</th>
+				</tr>
+				<tr>
+					<td>
+						<form>
+							<label for="cars">Choose a car:</label>
+			
+							<select name="cars" id="cars">
+							<option value="volvo">Volvo</option>
+							<option value="saab">Saab</option>
+							<option value="mercedes">Mercedes</option>
+							<option value="audi">Audi</option>
+							</select>
+
+							<input type="text" />
+						</form>
+					</td>
+					<td></td>
+				</tr>
+			</table>	
+
 				<h1>Hello ELTE!</h1>
 				<h1 id="lines-of-code-counter">0</h1>
 				<h3>Response: </h3>
@@ -214,6 +239,8 @@ export class RefactorErlView {
 				</div>
 				<p id="refac">~~PLACHOLDER~~</p>
 				<p id="ws">NO INFO</p>
+
+				<button>Hello</buton>
 
 				<a href="vscode://file///Users/fikorobert/Projects/ELS_Referl/els_dev/unused.erl:20:12">Example link</a>
 
