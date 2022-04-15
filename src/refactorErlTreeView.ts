@@ -39,6 +39,8 @@ export abstract class ReferlProvider<DataStorageType extends DataStorage, Type e
 		}
 	});
 
+	private static readonly emptyDecoration = vscode.window.createTextEditorDecorationType({});
+
 	static selectTreeItem(rangeDescriptor: RangeDescriptor, decoration: vscode.TextEditorDecorationType, message: string) {
 		const uri = vscode.Uri.file(rangeDescriptor.file);
 		vscode.commands.executeCommand('vscode.open', uri);
@@ -49,6 +51,7 @@ export abstract class ReferlProvider<DataStorageType extends DataStorage, Type e
 
 			const deco = { range: range, hoverMessage: message };
 			activeEditor.setDecorations(decoration, [deco]);
+			setTimeout(() => {activeEditor.setDecorations(this.emptyDecoration, []); console.log("REMOVED");}, 3000);
 			activeEditor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
 
 			const newSelection = new vscode.Selection(rangeDescriptor.from, rangeDescriptor.from);
