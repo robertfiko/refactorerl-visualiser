@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { readFileSync } from 'fs';
 import { getWebviewOptions, getNonce } from './extension';
+import { WebSocketHandler } from './webSocketHandler';
 
 //TODO:
 
@@ -43,6 +44,23 @@ export class RefactorErlView {
 
 	public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
 		RefactorErlView.currentPanel = new RefactorErlView(panel, extensionUri);
+	}
+
+	public async makeRequest() {
+		const data = "";
+		const value = await WebSocketHandler.getInstance().request("dependencyGraph", "");
+		/*let value = undefined;
+		resp.then(
+			(ok) => {
+				console.log("Resolved"); 
+				console.log(ok);
+				value = ok;
+			}
+		);*/
+
+
+
+		return value;
 	}
 
 	private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
@@ -178,74 +196,95 @@ export class RefactorErlView {
 		// Local path to css styles
 		const styleResetPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'reset.css');
 		const stylesPathMainPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css');
+		const stylesCustomPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'custom.css');
 
 		// Uri to load styles into webview
 		const stylesResetUri = webview.asWebviewUri(styleResetPath);
 		const stylesMainUri = webview.asWebviewUri(stylesPathMainPath);
+		const stylesCustomUri = webview.asWebviewUri(stylesCustomPath);
 
 		// Use a nonce to only allow specific scripts to be run
 		const nonce = getNonce();
 
+		let serverresp = "hehe.. no";
+		const p  =await  WebSocketHandler.getInstance().request("dependencyGraph", "");
+		console.log(p);
+		serverresp = p;
 
+		this._panel.webview.postMessage({ command: 'printTextualGraph', graph: p});
 
+		
+	
 
 
 
 		//TODO: if the response is undefined
-		return `<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
-
-				
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}';">
-
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-				<link href="${stylesResetUri}" rel="stylesheet">
-				<link href="${stylesMainUri}" rel="stylesheet">
-
+		return `
+		<!DOCTYPE html>
+		<html lang="en">
 		
-			</head>
-			<body>
+		<head>
+			<meta charset="UTF-8">
+		
+		
+			<meta http-equiv="Content-Security-Policy"
+				content="default-src 'none'; style-src ${webview.cspSource}; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}';">
+		
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+			<link href="${stylesResetUri}" rel="stylesheet">
+			<link href="${stylesMainUri}" rel="stylesheet">
+			<link href="${stylesCustomUri}" rel="stylesheet">
+		
+		
+		
+		</head>
+		
+		<body>
 			<table>
 				<tr>
 					<th>Properties</th>
 					<th>View</th>
 				</tr>
 				<tr>
-					<td>
+					<td id="properties-container">
 						<form>
-							<label for="cars">Choose a car:</label>
-			
-							<select name="cars" id="cars">
-							<option value="volvo">Volvo</option>
-							<option value="saab">Saab</option>
-							<option value="mercedes">Mercedes</option>
-							<option value="audi">Audi</option>
+							<label for="depgraph-level">Level</label>
+							<select name="depgraph-level" id="depgraph-level">
+								<option value="depgraph-level-fun">Function</option>
+								<option value="depgraph-level-mod">Module</option>
+								<option value="depgraph-level-modset">Set of modules (not available)</option>
 							</select>
+		
+							<label for="depgraph-type">Type</label>
+							<select name="depgraph-type" id="depgraph-type">
+								<option value="depgraph-type-whole">Whole graph</option>
+								<option value="depgraph-type-cyclic">Cyclics sub-graph</option>
+							</select>
+		
+							<label for="depgraph-start">Starting **</label>
+							<input type="text" name="depgraph-start">
 
-							<input type="text" />
+							<button>Generate</button>
+		
+		
 						</form>
 					</td>
-					<td></td>
+					<td id="view-column">
+						
+					</td>
 				</tr>
-			</table>	
+			</table>
 
-				<h1>Hello ELTE!</h1>
-				<h1 id="lines-of-code-counter">0</h1>
-				<h3>Response: </h3>
-				<div id="response">
-				</div>
-				<p id="refac">~~PLACHOLDER~~</p>
-				<p id="ws">NO INFO</p>
+			<h1 id="refac">NO</h1>
 
-				<button>Hello</buton>
-
-				<a href="vscode://file///Users/fikorobert/Projects/ELS_Referl/els_dev/unused.erl:20:12">Example link</a>
-
-				<script nonce="${nonce}" src="${scriptUri}"></script>
-			</body>
-			</html>`;
+			<script nonce="${nonce}" src="${scriptUri}"></script>
+		</body>
+		
+		</html>`;
 	}
 }
+
+
+//TODO: Sometimes this becomes... clumsy
+//TODO: what is nonce

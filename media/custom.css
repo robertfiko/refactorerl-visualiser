@@ -1,0 +1,14 @@
+p.dependency-element {
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+
+p.dependency-element:hover {
+	background-color: var(--vscode-input-background);
+}
+
+td#properties-container {
+	vertical-align: top;
+	padding-right: 10px;
+}
+
