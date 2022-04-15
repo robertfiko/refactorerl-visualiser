@@ -72,7 +72,7 @@
 		"viewsWelcome": [
 			{
 				"view": "referlDashboard",
-				"contents": "RefactorErl: 🟢  Online",
+				"contents": "RefactorErl: 🟢  Online \n [Check](command:refactorErl.checkWebSocket)",
 				"when": "refactorErl.nodeReachable"
 			},
 			{
