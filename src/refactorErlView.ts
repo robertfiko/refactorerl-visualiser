@@ -89,11 +89,11 @@ export class RefactorErlView {
 
 		// Handle messages from the webview
 		this._panel.webview.onDidReceiveMessage(
-			message => {
-				switch (message.command) {
-					case 'dependecyGraph':
-						return;
+			(message) => {
+				if (message.command == "dependecyGraph") {
+					const p = WebSocketHandler.getInstance().request("dependencyGraph", message.params);
 				}
+				
 			},
 			null,
 			this._disposables
@@ -287,3 +287,5 @@ export class RefactorErlView {
 
 //TODO: Sometimes this becomes... clumsy
 //TODO: what is nonce
+
+//TODO: case-ek átnézése, hogy megfelelőe e a kontroll flow
