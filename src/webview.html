@@ -6,14 +6,25 @@
 	<tr>
 		<td>
 			<form>
-				<label for="cars">Choose a car:</label>
-
-				<select name="cars" id="cars">
-				  <option value="volvo">Volvo</option>
-				  <option value="saab">Saab</option>
-				  <option value="mercedes">Mercedes</option>
-				  <option value="audi">Audi</option>
+				<label for="depgraph-level">Level</label>
+				<select name="depgraph-level" id="depgraph-level">
+				  <option value="depgraph-level-fun">Function</option>
+				  <option value="depgraph-level-mod">Module</option>
+				  <option value="depgraph-level-modset">Set of modules (not available)</option>
 				</select>
+
+				<label for="depgraph-type">Type</label>
+				<select name="depgraph-type" id="depgraph-type">
+				  <option value="depgraph-type-whole">Whole graph</option>
+				  <option value="depgraph-type-cyclic">Cyclics sub-graph</option>
+				</select>
+
+				<label for="depgraph-start">Starting **</label>
+				<input type="text" name="depgraph-start">
+
+				<input type="button" value="Generate">
+
+
 			</form>
 		</td>
 		<td></td>

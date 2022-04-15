@@ -91,7 +91,7 @@ export class RefactorErlView {
 		this._panel.webview.onDidReceiveMessage(
 			message => {
 				switch (message.command) {
-					case 'alert':
+					case 'graph':
 						vscode.window.showErrorMessage(message.text);
 						return;
 				}
@@ -248,7 +248,7 @@ export class RefactorErlView {
 				</tr>
 				<tr>
 					<td id="properties-container">
-						<form>
+						<form id="graph-properties">
 							<label for="depgraph-level">Level</label>
 							<select name="depgraph-level" id="depgraph-level">
 								<option value="depgraph-level-fun">Function</option>
@@ -265,7 +265,7 @@ export class RefactorErlView {
 							<label for="depgraph-start">Starting **</label>
 							<input type="text" name="depgraph-start">
 
-							<button>Generate</button>
+							<button type="button" id="graph-properties-generate">Generate</button>
 		
 		
 						</form>

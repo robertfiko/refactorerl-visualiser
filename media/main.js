@@ -5,6 +5,20 @@ const vscode = acquireVsCodeApi();
 const oldState = /** @type {{ count: number} | undefined} */ (vscode.getState());
 const refacState = /** @type {HTMLElement} */ (document.getElementById('refac'));
 const graphView = /** @type {HTMLElement} */ (document.getElementById('view-column'));
+const generateButton = /** @type {HTMLElement} */ (document.getElementById('graph-properties-generate'));
+
+generateButton.addEventListener('click', (event) => {
+    const level = /** @type {HTMLSelectElement} */ (document.getElementById('depgraph-level'));
+    const type = /** @type {HTMLSelectElement} */ (document.getElementById('depgraph-type'));
+
+    console.log(level.value);
+    console.log(type.value);
+
+    vscode.postMessage({
+        command: 'graph',
+        text: 'Hello!'
+    })
+});
 
 // Handle messages sent from the extension to the webview
 window.addEventListener('message', event => {
