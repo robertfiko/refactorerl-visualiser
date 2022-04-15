@@ -1,5 +1,7 @@
 # RefactorErl visualiser
 
+[![Lines Of Code](https://tokei.rs/b1/github/robertfiko/refactorerl-visualiser?category=code)](https://github.com/robertfiko/refactorerl-visualiser)
+
 RefactorErl visualiser is a Visual Studio Code plugin, which works well with Erlang LS and RefactorErl. 
 
 (**Ref**actor Erl and **E**rlang **LS** ~ refels)
