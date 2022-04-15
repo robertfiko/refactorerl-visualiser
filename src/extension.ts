@@ -6,8 +6,6 @@ import { VariableOriginProvider } from './variableOrigin';
 import { WebSocketHandler } from './webSocketHandler';
 
 export function activate(context: vscode.ExtensionContext) {
-
-
 	vscode.commands.executeCommand('setContext', 'refactorErl.nodeReachable', false);
 	WebSocketHandler.getInstance();
 
@@ -30,13 +28,9 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.registerCommand('customQuery.goToLocation', (origin: RangeDescriptor) => CustomQueryProvider.selectResultItem(origin))
 		);
 
-
-		
-
 		context.subscriptions.push(
 			vscode.commands.registerCommand('refactorErl.checkWebSocket', () => {
-				WebSocketHandler.getInstance().connect();
-				
+				WebSocketHandler.getInstance().reConnect();
 			})
 		);
 
@@ -58,7 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
 			});
 		}
 
-		context.subscriptions.push(
+		context.subscriptions.push( //TODO: remove
 			vscode.commands.registerCommand('refactorErl.doRefactor', () => {
 				if (RefactorErlView.currentPanel) {
 					RefactorErlView.currentPanel.doRefactor();
@@ -88,14 +82,14 @@ export function activate(context: vscode.ExtensionContext) {
 									request: value.request,
 								};
 								customQueryProvider.refresh(resp);
-								
+
 							}
 							else {
 								vscode.window.showErrorMessage(`Error with request: ${result} `);
 							}
-							
+
 						},
-						(error) => { vscode.window.showErrorMessage(`Timeout: ${result} `);  }
+						(error) => { vscode.window.showErrorMessage(`Timeout: ${result} `); }
 					);
 
 					return response;
