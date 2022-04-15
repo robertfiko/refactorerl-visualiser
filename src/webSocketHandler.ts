@@ -1,14 +1,13 @@
 import { WebSocket } from "ws";
 import * as vscode from 'vscode';
-import { TIMEOUT } from "dns";
-import { deflateSync } from "zlib";
-import { PerformanceObserver } from "perf_hooks";
+import { v4 } from 'uuid';
 
 export class WebSocketHandler {
 	private static instance: WebSocketHandler;
 	private socket: WebSocket;
 	private socketOnline: boolean;
 	private subs: Map<string, ((param: any) => void)[]>;
+	private reqIdsubs: Map<string, (param: any) => void>;
 	private uri: string;
 	private vsOutput: vscode.OutputChannel;
 	private tryingToConnect;
@@ -23,15 +22,12 @@ export class WebSocketHandler {
 		this.tryingToConnect = false;
 		this.runningPromise = undefined;
 		this.subs = new Map<string, ((param: any) => void)[]>();
+		this.reqIdsubs = new Map<string, ((param: any) => void)>();
 		this.uri = 'ws://127.0.0.1:8002/vsc_api.yaws';
 
 		this.socket = new WebSocket(this.uri);
 		this.connect();
 	}
-
-	/*public isCurrentlyConnection(): boolean {
-		return this.tryingToConnect;
-	} */
 
 	public async connect(): Promise<any> {
 		const reponsePromise = new Promise<any>((resolve, reject) => {
@@ -59,15 +55,28 @@ export class WebSocketHandler {
 
 					this.socket.onmessage = (eventStream) => {
 						const streamObject = JSON.parse(String(eventStream.data));
-						const event = streamObject.event;
-						const data = streamObject.data;
+						const reqId = streamObject.callbackId;
+						if (reqId == "broadcast") {
+							const event = streamObject.event;
+							const data = streamObject.data;
 
-						const subsFuns = this.subs.get(event);
-						if (subsFuns != undefined && subsFuns.length > 0) {
-							for (const fun of subsFuns) {
-								fun(data);
+							const subsFuns = this.subs.get(event);
+							if (subsFuns != undefined && subsFuns.length > 0) {
+								for (const fun of subsFuns) {
+									fun(data);
+								}
 							}
 						}
+
+						else {
+							const data = streamObject.data;
+							const reqIdSubFun = this.reqIdsubs.get(reqId);
+							if (reqIdSubFun) {
+								reqIdSubFun(data);
+								this.reqIdsubs.delete(reqId);
+							}	
+						}
+
 					};
 
 					this.subscribe("error", (data) => { vscode.window.showErrorMessage("Error: " + String(data)); });
@@ -77,9 +86,7 @@ export class WebSocketHandler {
 				}
 			}
 			else if (this.socketOnline) {
-				return Promise.resolve("WebSocketHandler.getInstance()");
-				//TODO: CHECK connection
-				//TODO: when called on living connection the promise doesn't get rersolved somehwy :/ 
+				return WebSocketHandler.getInstance();
 			}
 		});
 
@@ -87,29 +94,42 @@ export class WebSocketHandler {
 	}
 
 	public async reConnect(): Promise<any> {
-		if (!this.tryingToConnect) {
-			return vscode.window.withProgress({
-				location: vscode.ProgressLocation.Notification,
-				title: `Connecting to RefactorErl via WS...`,
-				cancellable: false
-			}, (progress) => {
-				const response = WebSocketHandler.getInstance().connect();
-				response.then(
-					(value) => {
-						progress.report({ increment: 100, });
-						vscode.window.showInformationMessage(`Connected to RefactorErl via WS!`);
-					},
-					(error) => {
-						vscode.window.showErrorMessage(`Cannot conenct to RefactorErl via WS.`);
-					}
-				);
-
-				return response;
-			});
+		await this.aliveCheck();
+		if (this.socketOnline) {
+			vscode.window.showInformationMessage(`Connected to RefactorErl via WS!`);
 		}
 		else {
-			return this.runningPromise;
+			if (!this.tryingToConnect) {
+				return vscode.window.withProgress({
+					location: vscode.ProgressLocation.Notification,
+					title: `Connecting to RefactorErl via WS...`,
+				}, (progress, token) => {
+					const response = WebSocketHandler.getInstance().connect();
+					response.then(
+						(value) => {
+							progress.report({ increment: 100, });
+							vscode.window.showInformationMessage(`Connected to RefactorErl via WS!`);
+						},
+						(error) => {
+							vscode.window.showErrorMessage(`Cannot conenct to RefactorErl via WS.`);
+						}
+					);
+					return response;
+				});
+			}
+			else {
+				return this.runningPromise;
+			}
 		}
+	}
+
+	public async aliveCheck(): Promise<boolean> {
+		return await this.request("alive", "").then(
+			(response) => {
+				this.socketOnline = response == 'alive';
+				return this.socketOnline;
+			}
+		);
 	}
 
 	public static getInstance(): WebSocketHandler {
@@ -127,32 +147,57 @@ export class WebSocketHandler {
 		else {
 			this.subs.set(event, [fun]);
 		}
-
 	}
 
-	private send(request: string, data: any) {
-		const obj = {
-			requestType: request,
-			data: data
-		};
-		this.socket.send(JSON.stringify(obj));
+	private addRequestHandler(reqId: string, fun: (param: any) => void) {
+		if (this.reqIdsubs.has(reqId)) {
+			vscode.window.showErrorMessage('Handling is already in progress for that request ID');
+		}
+		else {
+			this.reqIdsubs.set(reqId, fun);
+		}
 	}
-
-	public async request(requestType: string, data: any): Promise<any> { //TODO: uniqe request type or id or something to not overloead the handlers and indentify where to send the response
-		const responsePromise = new Promise((resolve, reject) => {
-			this.send(requestType, data);
-			const responseEvent = requestType + "_response";
-			let dataArrived = undefined;
-			this.subscribe(responseEvent, (data) => {
-				dataArrived = data;
-				resolve(dataArrived);
-				clearTimeout(timeout);
-			});
-
-			const timeout = setTimeout(() => { reject("TIMEOUT"); }, WebSocketHandler.TIMEOUT);
-		});
-
-		return responsePromise;
+	
+	/**
+	 * Executes a type of request on the server trough WS
+	 * @param requestType The type of request, which is recognised by the server.
+	 * @param data The data which is sent to the server with type of request
+	 * @returns Promise with the results, if resolved
+	 */
+	public async request(requestType: string, data: any): Promise<any> { 
+		if (this.socketOnline) {
+			try {
+				const responsePromise = new Promise((resolve, reject) => {
+					const reqId = v4();
+					//Sending to WS
+					const obj = {
+						requestType: requestType,
+						data: data,
+						callbackId: reqId
+					};
+					this.socket.send(JSON.stringify(obj));
+		
+					let dataArrived = undefined;
+					this.addRequestHandler(reqId, (data) => {
+						dataArrived = data;
+						resolve(dataArrived);
+						clearTimeout(timeout);
+					});
+		
+					const timeout = setTimeout(() => { reject("TIMEOUT"); }, WebSocketHandler.TIMEOUT);
+				});
+		
+				return responsePromise;
+			} catch (error) {
+				this.reConnect();
+				this.request(requestType, data); //TODO: introduce some recursive logics this could be heavy
+			}
+		}
+		else {
+			this.reConnect();
+			this.request(requestType, data);
+		}
+		
 	}
 
 

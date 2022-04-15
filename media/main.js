@@ -14,9 +14,14 @@ generateButton.addEventListener('click', (event) => {
     console.log(level.value);
     console.log(type.value);
 
+    const graphParams = {
+        type: type.value,
+        level: level.value
+    }
+
     vscode.postMessage({
-        command: 'graph',
-        text: 'Hello!'
+        command: 'dependecyGraph',
+        params: graphParams,
     })
 });
 

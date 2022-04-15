@@ -5,6 +5,8 @@ import { RefactorErlView } from './refactorErlView';
 import { VariableOriginProvider } from './variableOrigin';
 import { WebSocketHandler } from './webSocketHandler';
 
+//TODO: CODE
+
 export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.executeCommand('setContext', 'refactorErl.nodeReachable', false);
 	WebSocketHandler.getInstance();
@@ -31,6 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
 		context.subscriptions.push(
 			vscode.commands.registerCommand('refactorErl.checkWebSocket', () => {
 				WebSocketHandler.getInstance().reConnect();
+				//WebSocketHandler.getInstance().aliveCheck();
 			})
 		);
 

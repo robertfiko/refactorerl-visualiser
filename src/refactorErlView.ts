@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { getWebviewOptions, getNonce } from './extension';
 import { WebSocketHandler } from './webSocketHandler';
 
-//TODO:
+//TODO: CODE
 
 /**
  * Manages cat coding webview panels
@@ -91,8 +91,7 @@ export class RefactorErlView {
 		this._panel.webview.onDidReceiveMessage(
 			message => {
 				switch (message.command) {
-					case 'graph':
-						vscode.window.showErrorMessage(message.text);
+					case 'dependecyGraph':
 						return;
 				}
 			},
@@ -251,15 +250,15 @@ export class RefactorErlView {
 						<form id="graph-properties">
 							<label for="depgraph-level">Level</label>
 							<select name="depgraph-level" id="depgraph-level">
-								<option value="depgraph-level-fun">Function</option>
-								<option value="depgraph-level-mod">Module</option>
-								<option value="depgraph-level-modset">Set of modules (not available)</option>
+								<option value="function">Function</option>
+								<option value="module">Module</option>
+								<option value="moduleset">Set of modules (not available)</option>
 							</select>
 		
 							<label for="depgraph-type">Type</label>
 							<select name="depgraph-type" id="depgraph-type">
-								<option value="depgraph-type-whole">Whole graph</option>
-								<option value="depgraph-type-cyclic">Cyclics sub-graph</option>
+								<option value="whole">Whole graph</option>
+								<option value="cyclic">Cyclics sub-graph</option>
 							</select>
 		
 							<label for="depgraph-start">Starting **</label>
