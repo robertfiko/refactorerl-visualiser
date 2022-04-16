@@ -18,6 +18,9 @@ visualiser:
 	vsce package --out refactorerl_visualiser.vsix
 	code --install-extension refactorerl_visualiser.vsix --force
 
+remove:
+	code --uninstall-extension robert-fiko.refactorerl-visualizer --force
+
 refels-dev:
 	git clone https://github.com/robertfiko/vscode
 	mv vscode vscode-els-referl
