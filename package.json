@@ -64,12 +64,12 @@
 		"viewsWelcome": [
 			{
 				"view": "referlDashboard",
-				"contents": "RefactorErl: 🟢  Online \n [Check connection](command:refactorErl.checkWebSocket)",
+				"contents": "RefactorErl: 🟢  Online \n [Check connection](command:refactorErl.checkConnection)",
 				"when": "refactorErl.nodeReachable"
 			},
 			{
 				"view": "referlDashboard",
-				"contents": "RefactorErl: 🔴  Not reachable XX \n RefactorErl is using WebSocket, to deliver content. It seems the connection is down. \n[Try again](command:refactorErl.checkWebSocket)",
+				"contents": "RefactorErl: 🔴  Not reachable \n RefactorErl is using WebSocket, to deliver content. It seems the connection is down. \n[Try again](command:refactorErl.tryAgainConnect)",
 				"when": "!refactorErl.nodeReachable"
 			},
 			{

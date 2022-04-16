@@ -31,8 +31,15 @@ export function activate(context: vscode.ExtensionContext) {
 		);
 
 		context.subscriptions.push(
-			vscode.commands.registerCommand('refactorErl.checkWebSocket', () => {
-				WebSocketHandler.getInstance().reConnect();
+			vscode.commands.registerCommand('refactorErl.checkConnection', () => {
+				WebSocketHandler.getInstance().checkConnection();
+				//WebSocketHandler.getInstance().aliveCheck();
+			})
+		);
+
+		context.subscriptions.push(
+			vscode.commands.registerCommand('refactorErl.tryAgainConnect', () => {
+				WebSocketHandler.getInstance().connectTryAgain();
 				//WebSocketHandler.getInstance().aliveCheck();
 			})
 		);
