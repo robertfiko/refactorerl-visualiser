@@ -1,19 +1,9 @@
 import * as vscode from 'vscode';
-import { readFileSync } from 'fs';
-import { getWebviewOptions, getNonce } from './extension';
 import { WebSocketHandler } from './webSocketHandler';
 
-//TODO: CODE
-
-/**
- * Manages cat coding webview panels
- */
+//TODO: Code rendezés
 export class RefactorErlView {
-	/**
-	 * Track the currently panel. Only allow a single panel to exist at a time.
-	 */
 	public static currentPanel: RefactorErlView | undefined;
-	private referlOutputDiscovered: boolean;
 	public static readonly viewType = 'refactorErl';
 	private outputFilePath: vscode.Uri | undefined;
 	private readonly _panel: vscode.WebviewPanel;
@@ -46,25 +36,7 @@ export class RefactorErlView {
 		RefactorErlView.currentPanel = new RefactorErlView(panel, extensionUri);
 	}
 
-	public async makeRequest() {
-		const data = "";
-		const value = await WebSocketHandler.getInstance().request("dependencyGraph", "");
-		/*let value = undefined;
-		resp.then(
-			(ok) => {
-				console.log("Resolved"); 
-				console.log(ok);
-				value = ok;
-			}
-		);*/
-
-
-
-		return value;
-	}
-
 	private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
-		this.referlOutputDiscovered = false;
 		this._panel = panel;
 		this._extensionUri = extensionUri;
 
@@ -79,8 +51,7 @@ export class RefactorErlView {
 		this._panel.onDidChangeViewState(
 			e => {
 				if (this._panel.visible) {
-					//TODO: JS script should get some kind of inital thing as this is a thign
-					//this._update();
+					this._update();
 				}
 			},
 			null,
@@ -89,64 +60,15 @@ export class RefactorErlView {
 
 		// Handle messages from the webview
 		this._panel.webview.onDidReceiveMessage(
-			(message) => {
+			async (message) => {
 				if (message.command == "dependecyGraph") {
-					const p = WebSocketHandler.getInstance().request("dependencyGraph", message.params);
+					const response = await WebSocketHandler.getInstance().request("dependencyGraph", message.params);
+					this._panel.webview.postMessage({ command: 'printTextualGraph', graph: response});
 				}
-				
 			},
 			null,
 			this._disposables
 		);
-
-
-		if (vscode.workspace.workspaceFolders !== undefined) {
-			const workspaceUri = vscode.workspace.workspaceFolders[0].uri;
-
-			const outputFileName = "/.referloutput.json";
-			const outputFilePath = vscode.Uri.joinPath(workspaceUri, outputFileName);
-			const watcher = vscode.workspace.createFileSystemWatcher(outputFilePath.fsPath);
-			this.outputFilePath = outputFilePath;
-
-			let exsits = false;
-			try {
-				vscode.workspace.fs.stat(outputFilePath);
-				exsits = true;
-				this.doUpdateResponse();
-			} catch {
-				watcher.onDidCreate(() => {
-					vscode.window.showInformationMessage("Created!");
-					this.doUpdateResponse();
-					//this.openViewOnSide(outputFilePath);
-					//this._update();
-				});
-			}
-
-			watcher.onDidChange(() => {
-				vscode.window.showInformationMessage("Changed!");
-				this.doUpdateResponse();
-				//this.openViewOnSide(outputFilePath);
-				//this._update();
-			});
-
-		}
-	}
-
-	private async doUpdateResponse() {
-		if ( /*this.referlOutputDiscovered &&*/this.outputFilePath != undefined) {
-			const uri: vscode.Uri = this.outputFilePath;
-			const JsonString = await vscode.workspace.openTextDocument(uri).then((document) => {
-				return document.getText();
-			});
-			const response = JSON.parse(JsonString);
-			this._panel.webview.postMessage({ command: 'updateResponse', data: response });
-		}
-	}
-
-	public doRefactor() {
-		// Send a message to the webview webview.
-		// You can send any JSON serializable data.
-		this._panel.webview.postMessage({ command: 'refactor' });
 	}
 
 	public dispose() {
@@ -165,13 +87,10 @@ export class RefactorErlView {
 
 	private async _update() {
 		const webview = this._panel.webview;
-		this._panel.title = "TEST";
+		this._panel.title = "RefactorErl: Dependencies";
 		const promise = this._getHtmlForWebview(webview);
 		this._panel.webview.html = await Promise.resolve(promise);
 	}
-
-
-
 
 
 	private openViewOnSide(uri: vscode.Uri) {
@@ -186,11 +105,9 @@ export class RefactorErlView {
 	}
 
 	private async _getHtmlForWebview(webview: vscode.Webview) {
-		// Local path to main script run in the webview
-		const scriptPathOnDisk = vscode.Uri.joinPath(this._extensionUri, 'media', 'main.js');
-
-		// And the uri we use to load this script in the webview
-		const scriptUri = (scriptPathOnDisk).with({ 'scheme': 'vscode-resource' });
+		// Generate URI to be able  to load from webview
+		const scriptPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'main.js');
+		const scriptUri = (scriptPath).with({ 'scheme': 'vscode-resource' });
 
 		// Local path to css styles
 		const styleResetPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'reset.css');
@@ -205,27 +122,12 @@ export class RefactorErlView {
 		// Use a nonce to only allow specific scripts to be run
 		const nonce = getNonce();
 
-		let serverresp = "hehe.. no";
-		const p  =await  WebSocketHandler.getInstance().request("dependencyGraph", "");
-		console.log(p);
-		serverresp = p;
-
-		this._panel.webview.postMessage({ command: 'printTextualGraph', graph: p});
-
-		
-	
-
-
-
-		//TODO: if the response is undefined
 		return `
 		<!DOCTYPE html>
 		<html lang="en">
 		
 		<head>
 			<meta charset="UTF-8">
-		
-		
 			<meta http-equiv="Content-Security-Policy"
 				content="default-src 'none'; style-src ${webview.cspSource}; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}';">
 		
@@ -235,12 +137,10 @@ export class RefactorErlView {
 			<link href="${stylesMainUri}" rel="stylesheet">
 			<link href="${stylesCustomUri}" rel="stylesheet">
 		
-		
-		
 		</head>
 		
 		<body>
-			<table>
+			<table id="graph-container">
 				<tr>
 					<th>Properties</th>
 					<th>View</th>
@@ -265,6 +165,7 @@ export class RefactorErlView {
 							<input type="text" name="depgraph-start">
 
 							<button type="button" id="graph-properties-generate">Generate</button>
+							<button type="button" id="clear">Clear</button>
 		
 		
 						</form>
@@ -285,7 +186,22 @@ export class RefactorErlView {
 }
 
 
-//TODO: Sometimes this becomes... clumsy
-//TODO: what is nonce
+// nonce = Number used ONCE
+export function getNonce() {
+	let text = '';
+	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	for (let i = 0; i < 32; i++) {
+		text += possible.charAt(Math.floor(Math.random() * possible.length));
+	}
+	return text;
+}
 
-//TODO: case-ek átnézése, hogy megfelelőe e a kontroll flow
+export function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
+	return {
+		// Enable javascript in the webview
+		enableScripts: true,
+
+		// And restrict the webview to only loading content from our extension's `media` directory.
+		localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media')]
+	};
+}

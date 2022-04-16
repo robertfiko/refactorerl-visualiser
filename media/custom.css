@@ -8,7 +8,17 @@ p.dependency-element:hover {
 }
 
 td#properties-container {
+	width: 20%;
 	vertical-align: top;
 	padding-right: 10px;
+}
+
+td#view-column {
+	width: 80%;
+	vertical-align: top;
+}
+
+table#graph-container {
+	width: 100%;
 }
 

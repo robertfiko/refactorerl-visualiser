@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { CustomQueryProvider } from './customQuery';
 import { RangeDescriptor } from './refactorErlTreeView';
-import { RefactorErlView } from './refactorErlView';
+import { getWebviewOptions, RefactorErlView } from './refactorErlView';
 import { VariableOriginProvider } from './variableOrigin';
 import { WebSocketHandler } from './webSocketHandler';
 
@@ -38,7 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
 		);
 
 		context.subscriptions.push(
-			vscode.commands.registerCommand('refactorErl.start', () => {
+			vscode.commands.registerCommand('refactorErl.dependencyGraph', () => {
 				RefactorErlView.createOrShow(context.extensionUri);
 			})
 		);
@@ -54,14 +54,6 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 			});
 		}
-
-		context.subscriptions.push( //TODO: remove
-			vscode.commands.registerCommand('refactorErl.doRefactor', () => {
-				if (RefactorErlView.currentPanel) {
-					RefactorErlView.currentPanel.doRefactor();
-				}
-			})
-		);
 
 		context.subscriptions.push(vscode.commands.registerCommand('refactorErl.query', async () => {
 			const result = await vscode.window.showInputBox({
@@ -103,21 +95,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 }
 
-export function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
-	return {
-		// Enable javascript in the webview
-		enableScripts: true,
 
-		// And restrict the webview to only loading content from our extension's `media` directory.
-		localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media')]
-	};
-}
 
-export function getNonce() {
-	let text = '';
-	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	for (let i = 0; i < 32; i++) {
-		text += possible.charAt(Math.floor(Math.random() * possible.length));
-	}
-	return text;
-}
+

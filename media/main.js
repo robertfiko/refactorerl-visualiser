@@ -6,6 +6,11 @@ const oldState = /** @type {{ count: number} | undefined} */ (vscode.getState())
 const refacState = /** @type {HTMLElement} */ (document.getElementById('refac'));
 const graphView = /** @type {HTMLElement} */ (document.getElementById('view-column'));
 const generateButton = /** @type {HTMLElement} */ (document.getElementById('graph-properties-generate'));
+const clearButton = /** @type {HTMLElement} */ (document.getElementById('clear'));
+
+clearButton.addEventListener('click', () => {
+    graphView.innerHTML = "";
+})
 
 generateButton.addEventListener('click', (event) => {
     const level = /** @type {HTMLSelectElement} */ (document.getElementById('depgraph-level'));
@@ -29,21 +34,17 @@ generateButton.addEventListener('click', (event) => {
 window.addEventListener('message', event => {
     const message = event.data; // The json data that the extension sent
     switch (message.command) {
-        case 'refactor':
-            refacState.textContent = "YES REFAC";
-            break;
         case 'updateResponse':
 
 
             break;
         case 'printTextualGraph':
             const graph = message.graph
+            graphView.innerHTML = "";
             for (const elem of graph) {
                 console.log(elem)
                 
                 let content = elem.dependant + " -> "
-                
-                
 
                 if (elem.dependency.length > 0) {
                     content += " [ ";
@@ -68,6 +69,7 @@ window.addEventListener('message', event => {
                 p.innerHTML = content
                 graphView.appendChild(p)
             }
+            console.log("Graph drawn")
             break;
     }
 });

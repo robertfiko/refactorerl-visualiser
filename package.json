@@ -18,22 +18,16 @@
 	"activationEvents": [
 		"onView:variableOrigin",
 		"onView:referlDashboard",
-		"onCommand:refactorErl.start",
+		"onCommand:refactorErl.dependencyGraph",
 		"onCommand:refactorErl.query",
-		"onCommand:refactorErl.doRefactor",
 		"onWebviewPanel:refactorErl"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "refactorErl.start",
-				"title": "RefactorErl Visualizer",
-				"category": "RefactorErl"
-			},
-			{
-				"command": "refactorErl.doRefactor",
-				"title": "Do some refactoring",
+				"command": "refactorErl.dependencyGraph",
+				"title": "Dependency Graph Visualiser",
 				"category": "RefactorErl"
 			},
 			{
@@ -75,7 +69,7 @@
 			},
 			{
 				"view": "referlDashboard",
-				"contents": "RefactorErl: 🔴  Not reachable \n RefactorErl is using WebSocket, to deliver content. It seems the connection is down. \n[Try again](command:refactorErl.checkWebSocket)",
+				"contents": "RefactorErl: 🔴  Not reachable XX \n RefactorErl is using WebSocket, to deliver content. It seems the connection is down. \n[Try again](command:refactorErl.checkWebSocket)",
 				"when": "!refactorErl.nodeReachable"
 			},
 			{

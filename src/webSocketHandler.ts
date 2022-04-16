@@ -40,7 +40,7 @@ export class WebSocketHandler {
 				try {
 					this.tryingToConnect = true;
 					this.socket = new WebSocket(this.uri);
-					const timeout = setTimeout(() => { this.tryingToConnect = false; reject("TIMEOUT"); }, WebSocketHandler.TIMEOUT);
+					const timeout = setTimeout(() => { this.tryingToConnect = false; reject("SOCKET_CONNECTION_TIMEOUT"); }, WebSocketHandler.TIMEOUT);
 					this.socket.addEventListener('open', (event) => {
 						this.socket.send('client-connected');
 
@@ -53,6 +53,11 @@ export class WebSocketHandler {
 						resolve(WebSocketHandler.getInstance());
 					});
 
+					this.socket.onclose = (eventStream) => {
+						this.socketOnline = false;
+					};
+
+					//MESSAGE HANDLING
 					this.socket.onmessage = (eventStream) => {
 						const streamObject = JSON.parse(String(eventStream.data));
 						const reqId = streamObject.callbackId;
@@ -124,12 +129,33 @@ export class WebSocketHandler {
 	}
 
 	public async aliveCheck(): Promise<boolean> {
-		return await this.request("alive", "").then(
-			(response) => {
-				this.socketOnline = response == 'alive';
-				return this.socketOnline;
+		const script = async() => {
+			return await this.request("alive", "").then(
+				(response) => {
+					this.socketOnline = response == 'alive';
+					return this.socketOnline;
+				},
+				(rejectedResp) => {
+					return false;
+				}
+			);
+		};
+		if (this.socketOnline) {
+			return script();
+		}
+		else {
+			// If socket is not alive, try to connect to it, then execute
+			this.connect();
+			if (this.socketOnline) {
+				return script();
 			}
-		);
+			else {
+				return false;
+			}
+			
+			
+		}
+		
 	}
 
 	public static getInstance(): WebSocketHandler {
@@ -189,13 +215,17 @@ export class WebSocketHandler {
 		
 				return responsePromise;
 			} catch (error) {
-				this.reConnect();
-				this.request(requestType, data); //TODO: introduce some recursive logics this could be heavy
+				return "error1";
+				//this.reConnect();
+				//this.request(requestType, data); //TODO: introduce some recursive logics this could be heavy
+				//TODO: error management
 			}
 		}
 		else {
-			this.reConnect();
-			this.request(requestType, data);
+			return "error2";
+			/*this.reConnect();
+			this.request(requestType, data);*/
+			//TODO: error management
 		}
 		
 	}
