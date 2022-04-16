@@ -40,6 +40,11 @@ export class WebSocketHandler {
 		return this._socketConnected;
 	}
 
+	/**
+	 * Establishes a connection to the server.
+	 * @returns A Promise object. If resolved it contains the instance
+	 * if rejected a cause of rejection
+	 */
 	public async connect(): Promise<any> {
 		const reponsePromise = new Promise<any>((resolve, reject) => {
 			if (this.tryingToConnect) {
@@ -107,7 +112,14 @@ export class WebSocketHandler {
 		return reponsePromise;
 	}
 
-	public async connectTryAgain() {
+	/**
+	 * Tries to establish a connection with the server. This is possibly called
+	 * from the UI, so this is equipped with interactive elements.
+	 * Can be called if the WS is alive, or not.
+	 * @returns The Promise of the connection. If resolved it is an instance
+	 * if rejected the casue of rejection.
+	 */
+	public async connectTryAgain(): Promise<any> {
 		const script = (): Thenable<any> | undefined => {
 			if (!this.tryingToConnect) {
 				return vscode.window.withProgress({
@@ -148,7 +160,13 @@ export class WebSocketHandler {
 		}
 	}
 
-	public async checkConnection(param: { withMessages: boolean } = { withMessages: false }) {
+	/**
+	 * Checks the connection with the server. This is possibly called
+	 * from the UI, so this is equipped with interactive elements.
+	 * @returns The Promise of the connection. If resolved it is an instance
+	 * if rejected the casue of rejection
+	 */
+	public async checkConnection(): Promise<boolean> {
 		if (this.socketConnected) {
 			return vscode.window.withProgress({
 				location: vscode.ProgressLocation.Notification,
@@ -159,11 +177,11 @@ export class WebSocketHandler {
 					(value) => {
 						if (value) {
 							progress.report({ increment: 100 });
-							if (param.withMessages) vscode.window.showInformationMessage("Connected to RefactorErl via WS!");
+							vscode.window.showInformationMessage("Connected to RefactorErl via WS!");
 						}
 						else {
 							progress.report({ increment: 100 });
-							if (param.withMessages) vscode.window.showInformationMessage("Cannot connect to RefactorErl via WS.");
+							vscode.window.showInformationMessage("Cannot connect to RefactorErl via WS.");
 						}
 					},
 					(error) => {
@@ -172,17 +190,17 @@ export class WebSocketHandler {
 				);
 				return response;
 			});
-
-
-
 		}
 		else {
 			await this.connectTryAgain();
-			await this.aliveCheck();
-			vscode.window.showInformationMessage("OFFLINE-offline");
+			return await this.aliveCheck();
 		}
 	}
 
+	/**
+	 * Checks if the connection is alive, by sending an alive request
+	 * @returns The state of the connection.
+	 */
 	public async aliveCheck(): Promise<boolean> {
 		const script = async () => {
 			return await this.request("alive", "").then(
@@ -213,6 +231,10 @@ export class WebSocketHandler {
 
 	}
 
+	/**
+	 * Get the handler instance (singleton)
+	 * @returns The one and only instance of the handler
+	 */
 	public static getInstance(): WebSocketHandler {
 		if (!WebSocketHandler.instance) {
 			WebSocketHandler.instance = new WebSocketHandler();
@@ -221,6 +243,11 @@ export class WebSocketHandler {
 		return WebSocketHandler.instance;
 	}
 
+	/**
+	 * Subscribes a handler function to an event
+	 * @param event Event for subscribtion
+	 * @param fun Handler function
+	 */
 	public subscribe(event: string, fun: (param: any) => void) {
 		if (this.subs.has(event)) {
 			this.subs.get(event)?.push(fun);
@@ -230,6 +257,12 @@ export class WebSocketHandler {
 		}
 	}
 
+	/**
+	 * Assigns a handler function for a Callback ID. When the response is
+	 * arrived from the server it will arrive back with the same ID.
+	 * @param reqId Request ID / Callback ID which is associated with the request
+	 * @param fun Handler function
+	 */
 	private addRequestHandler(reqId: string, fun: (param: any) => void) {
 		if (this.reqIdsubs.has(reqId)) {
 			vscode.window.showErrorMessage('Handling is already in progress for that request ID');
