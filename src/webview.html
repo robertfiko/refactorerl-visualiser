@@ -1,32 +1,38 @@
-<table>
-	<tr>
-		<th>Properties</th>
-		<th>View</th>
-	</tr>
-	<tr>
-		<td>
-			<form>
-				<label for="depgraph-level">Level</label>
-				<select name="depgraph-level" id="depgraph-level">
-				  <option value="depgraph-level-fun">Function</option>
-				  <option value="depgraph-level-mod">Module</option>
-				  <option value="depgraph-level-modset">Set of modules (not available)</option>
-				</select>
+<form id="graph-properties">
+	<label for="depgraph-level">Level</label>
+	<select name="depgraph-level" id="depgraph-level">
+		<option value="function">Function</option>
+		<option value="module">Module</option>
+		<option value="moduleset">Set of modules (!!)</option>
+	</select>
 
-				<label for="depgraph-type">Type</label>
-				<select name="depgraph-type" id="depgraph-type">
-				  <option value="depgraph-type-whole">Whole graph</option>
-				  <option value="depgraph-type-cyclic">Cyclics sub-graph</option>
-				</select>
+	<label for="depgraph-type">Type</label>
+	<select name="depgraph-type" id="depgraph-type">
+		<option value="whole">Whole graph</option>
+		<option value="cyclic">Cyclics sub-graph</option>
+	</select>
 
-				<label for="depgraph-start">Starting **</label>
-				<input type="text" name="depgraph-start">
+	<label for="depgraph-start">Starting **</label>
+	<input type="text" name="depgraph-start">
 
-				<input type="button" value="Generate">
+	<label for="depgraph-connection">Connection **</label>
+	<input type="text" name="depgraph-connection">
+
+	<label for="depgraph-excluded">Excluded **</label>
+	<input type="text" name="depgraph-excluded">
+
+	<input type="checkbox" name="vehicle1" value="exclude-otp">
+  	<label for="vehicle1">Exclude OTP</label><br>
+
+	<p>Excluded libraries</p>
+
+	<p>Output format</p>
+	
 
 
-			</form>
-		</td>
-		<td></td>
-	</tr>
-</table>
+
+	<button type="button" id="graph-properties-generate">Generate</button>
+	<button type="button" id="clear">Clear</button>
+
+
+</form>

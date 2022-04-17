@@ -1,14 +1,16 @@
 import * as vscode from 'vscode';
 import { WebSocketHandler } from './webSocketHandler';
 
-//TODO: Code rendezés
-export class RefactorErlView {
-	public static currentPanel: RefactorErlView | undefined;
+class ViewState {
+	public textualGraph: any;
+}
+export class DependencyGraphView {
+	public static currentPanel: DependencyGraphView | undefined;
 	public static readonly viewType = 'refactorErl';
-	private outputFilePath: vscode.Uri | undefined;
-	private readonly _panel: vscode.WebviewPanel;
-	private readonly _extensionUri: vscode.Uri;
+	private readonly panel: vscode.WebviewPanel;
+	private readonly extensionUri: vscode.Uri;
 	private _disposables: vscode.Disposable[] = [];
+	private state: ViewState;
 
 	public static createOrShow(extensionUri: vscode.Uri) {
 		const column = vscode.window.activeTextEditor
@@ -16,42 +18,43 @@ export class RefactorErlView {
 			: undefined;
 
 		// If we already have a panel, show it.
-		if (RefactorErlView.currentPanel) {
-			RefactorErlView.currentPanel._panel.reveal(column);
+		if (DependencyGraphView.currentPanel) {
+			DependencyGraphView.currentPanel.panel.reveal(column);
 			return;
 		}
 
 		// Otherwise, create a new panel.
 		const panel = vscode.window.createWebviewPanel(
-			RefactorErlView.viewType,
+			DependencyGraphView.viewType,
 			'RefactorErl',
 			column || vscode.ViewColumn.One,
-			getWebviewOptions(extensionUri)
+			DependencyGraphView.getWebviewOptions(extensionUri)
 		);
 
-		RefactorErlView.currentPanel = new RefactorErlView(panel, extensionUri);
+		DependencyGraphView.currentPanel = new DependencyGraphView(panel, extensionUri);
 	}
 
 	public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
-		RefactorErlView.currentPanel = new RefactorErlView(panel, extensionUri);
+		DependencyGraphView.currentPanel = new DependencyGraphView(panel, extensionUri);
 	}
 
 	private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
-		this._panel = panel;
-		this._extensionUri = extensionUri;
+		this.state = new ViewState();
+		this.panel = panel;
+		this.extensionUri = extensionUri;
 
 		// Set the webview's initial html content
-		this._update();
+		this.updateContent();
 
 		// Listen for when the panel is disposed
 		// This happens when the user closes the panel or when the panel is closed programmatically
-		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
+		this.panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
 		// Update the content based on view changes
-		this._panel.onDidChangeViewState(
+		this.panel.onDidChangeViewState(
 			e => {
-				if (this._panel.visible) {
-					this._update();
+				if (this.panel.visible) {
+					this.updateContent();
 				}
 			},
 			null,
@@ -59,11 +62,12 @@ export class RefactorErlView {
 		);
 
 		// Handle messages from the webview
-		this._panel.webview.onDidReceiveMessage(
+		this.panel.webview.onDidReceiveMessage(
 			async (message) => {
 				if (message.command == "dependecyGraph") {
 					const response = await WebSocketHandler.getInstance().request("dependencyGraph", message.params);
-					this._panel.webview.postMessage({ command: 'printTextualGraph', graph: response});
+					this.state.textualGraph = response;
+					this.panel.webview.postMessage({ command: 'printTextualGraph', graph: response });
 				}
 			},
 			null,
@@ -72,10 +76,10 @@ export class RefactorErlView {
 	}
 
 	public dispose() {
-		RefactorErlView.currentPanel = undefined;
+		DependencyGraphView.currentPanel = undefined;
 
 		// Clean up our resources
-		this._panel.dispose();
+		this.panel.dispose();
 
 		while (this._disposables.length) {
 			const x = this._disposables.pop();
@@ -85,34 +89,22 @@ export class RefactorErlView {
 		}
 	}
 
-	private async _update() {
-		const webview = this._panel.webview;
-		this._panel.title = "RefactorErl: Dependencies";
-		const promise = this._getHtmlForWebview(webview);
-		this._panel.webview.html = await Promise.resolve(promise);
+	private async updateContent() {
+		const webview = this.panel.webview;
+		this.panel.title = "RefactorErl: Dependencies";
+		const promise = this.getHtmlForWebview(webview);
+		this.panel.webview.html = await Promise.resolve(promise);
 	}
 
-
-	private openViewOnSide(uri: vscode.Uri) {
-		const visible = vscode.window.visibleTextEditors;
-		const docs = [];
-		for (const visi of visible) {
-			docs.push(visi.document.uri.toString());
-		}
-
-		console.log(docs);
-		//vscode.window.showTextDocument(uri, { viewColumn: vscode.ViewColumn.Beside });
-	}
-
-	private async _getHtmlForWebview(webview: vscode.Webview) {
+	private async getHtmlForWebview(webview: vscode.Webview) {
 		// Generate URI to be able  to load from webview
-		const scriptPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'main.js');
+		const scriptPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'main.js');
 		const scriptUri = (scriptPath).with({ 'scheme': 'vscode-resource' });
 
 		// Local path to css styles
-		const styleResetPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'reset.css');
-		const stylesPathMainPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css');
-		const stylesCustomPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'custom.css');
+		const styleResetPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'reset.css');
+		const stylesPathMainPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'vscode.css');
+		const stylesCustomPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'custom.css');
 
 		// Uri to load styles into webview
 		const stylesResetUri = webview.asWebviewUri(styleResetPath);
@@ -120,7 +112,12 @@ export class RefactorErlView {
 		const stylesCustomUri = webview.asWebviewUri(stylesCustomPath);
 
 		// Use a nonce to only allow specific scripts to be run
-		const nonce = getNonce();
+		const nonce = DependencyGraphView.getNonce();
+
+		//Get data back from state
+		if (this.state.textualGraph) {
+			this.panel.webview.postMessage({ command: 'printTextualGraph', graph: this.state.textualGraph });
+		}
 
 		return `
 		<!DOCTYPE html>
@@ -152,22 +149,38 @@ export class RefactorErlView {
 							<select name="depgraph-level" id="depgraph-level">
 								<option value="function">Function</option>
 								<option value="module">Module</option>
-								<option value="moduleset">Set of modules (not available)</option>
+								<option value="moduleset">Set of modules (!!)</option>
 							</select>
-		
+
 							<label for="depgraph-type">Type</label>
 							<select name="depgraph-type" id="depgraph-type">
 								<option value="whole">Whole graph</option>
 								<option value="cyclic">Cyclics sub-graph</option>
 							</select>
-		
-							<label for="depgraph-start">Starting **</label>
+
+							<label for="depgraph-start">Starting <span class="modOrFun">**</span> (!!)</label>
 							<input type="text" name="depgraph-start">
+
+							<label for="depgraph-connection">Connection <span class="modOrFun">**</span> (!!)</label>
+							<input type="text" name="depgraph-connection">
+
+							<label for="depgraph-excluded">Excluded <span class="modOrFun">**</span> (!!)</label>
+							<input type="text" name="depgraph-excluded">
+
+							<input type="checkbox" name="vehicle1" value="exclude-otp">
+							  <label for="vehicle1">Exclude OTP (!!)</label><br>
+
+							<p>Excluded libraries (!!)</p>
+
+							<p>Output format (!!)</p>
+
+
+
 
 							<button type="button" id="graph-properties-generate">Generate</button>
 							<button type="button" id="clear">Clear</button>
-		
-		
+
+
 						</form>
 					</td>
 					<td id="view-column">
@@ -183,25 +196,28 @@ export class RefactorErlView {
 		
 		</html>`;
 	}
-}
 
+	public static getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
+		return {
+			// Enable javascript in the webview
+			enableScripts: true,
 
-// nonce = Number used ONCE
-export function getNonce() {
-	let text = '';
-	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	for (let i = 0; i < 32; i++) {
-		text += possible.charAt(Math.floor(Math.random() * possible.length));
+			// And restrict the webview to only loading content from our extension's `media` directory.
+			localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media')]
+		};
 	}
-	return text;
+
+	// nonce = Number used ONCE
+	public static getNonce() {
+		let text = '';
+		const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		for (let i = 0; i < 32; i++) {
+			text += possible.charAt(Math.floor(Math.random() * possible.length));
+		}
+		return text;
+	}
 }
 
-export function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
-	return {
-		// Enable javascript in the webview
-		enableScripts: true,
 
-		// And restrict the webview to only loading content from our extension's `media` directory.
-		localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media')]
-	};
-}
+
+
