@@ -75,7 +75,8 @@ export class WebSocketHandler {
 					this.socket.onmessage = (eventStream) => {
 						const streamObject = JSON.parse(String(eventStream.data));
 						const reqId = streamObject.callbackId;
-						if (reqId == "broadcast") {
+						const event = streamObject.event;
+						if (event != undefined && reqId == undefined) {
 							const event = streamObject.event;
 							const data = streamObject.data;
 
@@ -87,7 +88,7 @@ export class WebSocketHandler {
 							}
 						}
 
-						else {
+						else if (event == undefined && reqId != undefined) {
 							const data = streamObject.data;
 							const reqIdSubFun = this.reqIdsubs.get(reqId);
 							if (reqIdSubFun) {
