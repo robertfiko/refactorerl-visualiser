@@ -10,8 +10,10 @@ const graphView = (document.getElementById('view-column'));
 /* Form elements */
 const funModsPlaceholders = document.querySelectorAll(".modOrFun");
 
-const level = (document.getElementById('depgraph-level'));
-const type = (document.getElementById('depgraph-type'));
+const level = document.getElementById('depgraph-level');
+const type = document.getElementById('depgraph-type');
+const starting = document.getElementById('depgraph-start')
+
 const generateButton = (document.getElementById('graph-properties-generate'));
 const clearButton = (document.getElementById('clear'));
 
@@ -23,15 +25,20 @@ clearButton.addEventListener('click', () => {
 })
 
 generateButton.addEventListener('click', (event) => {
-    
-    
-
-    console.log(level.value);
-    console.log(type.value);
+    let startingValue = undefined;
+    if (starting.value != "") {
+        let startingArr = starting.value.split(';');
+        for (let i = 0; i < startingArr.length; i++) {
+            startingArr[i] = startingArr[i].trim();
+        }
+        console.log(startingArr)
+        startingValue = startingArr;
+    }
 
     const graphParams = {
         type: type.value,
-        level: level.value
+        level: level.value,
+        starting: startingValue
     }
 
     vscode.postMessage({
@@ -49,6 +56,11 @@ window.addEventListener('message', event => {
         case 'printTextualGraph':
             printTextualGraph(message.graph)
             break;
+        case 'textualGraphError':
+            graphView.innerHTML = "";
+            let h2 = document.createElement('h2');
+            h2.innerHTML = message.error;
+            graphView.appendChild(h2);
     }
 });
 
@@ -83,10 +95,10 @@ function printTextualGraph(graph) {
 
 function adjustLevelLabelsOnForm() {
     if (level.value == "function") {
-        funModsPlaceholders.forEach((elem) => elem.innerHTML = "function")
+        funModsPlaceholders.forEach((elem) => elem.innerHTML = "functions")
     }
     else if (level.value == "module") {
-        funModsPlaceholders.forEach((elem) => elem.innerHTML = "module")
+        funModsPlaceholders.forEach((elem) => elem.innerHTML = "modules")
     }
     else {
         funModsPlaceholders.forEach((elem) => elem.innerHTML = "{" + level.value + "}")

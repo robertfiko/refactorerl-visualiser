@@ -1,3 +1,4 @@
+import { rejects } from 'assert';
 import * as vscode from 'vscode';
 import { WebSocketHandler } from './webSocketHandler';
 
@@ -65,9 +66,24 @@ export class DependencyGraphView {
 		this.panel.webview.onDidReceiveMessage(
 			async (message) => {
 				if (message.command == "dependecyGraph") {
-					const response = await WebSocketHandler.getInstance().request("dependencyGraph", message.params);
-					this.state.textualGraph = response;
-					this.panel.webview.postMessage({ command: 'printTextualGraph', graph: response });
+					const responsePromise = WebSocketHandler.getInstance().request("dependencyGraph", message.params);
+					responsePromise.then(
+						(resolvedData) => {
+							if (resolvedData.status == "ok") {
+								this.state.textualGraph = resolvedData.data;
+								this.panel.webview.postMessage({ command: 'printTextualGraph', graph: resolvedData.data });
+							}
+							else {
+								vscode.window.showErrorMessage(resolvedData.data);
+								this.panel.webview.postMessage({ command: 'textualGraphError', error: resolvedData.data });
+							}
+						},
+							
+						(rejectCause) => {
+							vscode.window.showErrorMessage("Graph request error: " + rejectCause);
+							this.panel.webview.postMessage({ command: 'textualGraphError', error: "Graph request error: " + rejectCause });
+						}
+					);
 				}
 			},
 			null,
@@ -158,8 +174,10 @@ export class DependencyGraphView {
 								<option value="cyclic">Cyclics sub-graph</option>
 							</select>
 
-							<label for="depgraph-start">Starting <span class="modOrFun">**</span> (!!)</label>
-							<input type="text" name="depgraph-start">
+							<label for="depgraph-start">Starting <span class="modOrFun">**</span></label>
+							<input id="depgraph-start" type="text" name="depgraph-start" placeholder="module:fun/1">
+							<small>Separate by ;</small><br>
+							
 
 							<label for="depgraph-connection">Connection <span class="modOrFun">**</span> (!!)</label>
 							<input type="text" name="depgraph-connection">
