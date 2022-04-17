@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { CustomQueryProvider } from './customQuery';
 import { RangeDescriptor } from './refactorErlTreeView';
-import { getWebviewOptions, RefactorErlView } from './refactorErlView';
+import { DependencyGraphView } from './dependencyGraphView';
 import { VariableOriginProvider } from './variableOrigin';
 import { WebSocketHandler } from './webSocketHandler';
 
@@ -46,18 +46,18 @@ export function activate(context: vscode.ExtensionContext) {
 
 		context.subscriptions.push(
 			vscode.commands.registerCommand('refactorErl.dependencyGraph', () => {
-				RefactorErlView.createOrShow(context.extensionUri);
+				DependencyGraphView.createOrShow(context.extensionUri);
 			})
 		);
 
 		if (vscode.window.registerWebviewPanelSerializer) {
 			// Make sure we register a serializer in activation event
-			vscode.window.registerWebviewPanelSerializer(RefactorErlView.viewType, {
+			vscode.window.registerWebviewPanelSerializer(DependencyGraphView.viewType, {
 				async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, state: any) {
 					console.log(`Got state: ${state}`);
 					// Reset the webview options so we use latest uri for `localResourceRoots`.
-					webviewPanel.webview.options = getWebviewOptions(context.extensionUri);
-					RefactorErlView.revive(webviewPanel, context.extensionUri);
+					webviewPanel.webview.options = DependencyGraphView.getWebviewOptions(context.extensionUri);
+					DependencyGraphView.revive(webviewPanel, context.extensionUri);
 				}
 			});
 		}
