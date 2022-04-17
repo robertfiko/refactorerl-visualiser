@@ -38,7 +38,7 @@ generateButton.addEventListener('click', (event) => {
     const graphParams = {
         type: type.value,
         level: level.value,
-        starting: startingValue
+        starting_nodes: startingValue
     }
 
     vscode.postMessage({
@@ -61,11 +61,25 @@ window.addEventListener('message', event => {
             let h2 = document.createElement('h2');
             h2.innerHTML = message.error;
             graphView.appendChild(h2);
+        case 'setForm':
+            console.log(message.data);
+            const formRaw = message.data;
+            const formState = {
+                level: formRaw.level,
+                type: formRaw.type,
+                starting_nodes: [formRaw.starting_nodes]
+            }
+            console.log(formState)
+            setForm(formState);
+
+            //TODO send back form state for saving GOT STATE??
+            break;
     }
 });
 
 
 function printTextualGraph(graph) {
+    console.log(graph)
     graphView.innerHTML = "";
     for (const elem of graph) {
         let content = elem.dependant + " -> "
@@ -94,15 +108,31 @@ function printTextualGraph(graph) {
 }
 
 function adjustLevelLabelsOnForm() {
-    if (level.value == "function") {
+    if (level.value == "func") {
         funModsPlaceholders.forEach((elem) => elem.innerHTML = "functions")
     }
-    else if (level.value == "module") {
+    else if (level.value == "mod") {
         funModsPlaceholders.forEach((elem) => elem.innerHTML = "modules")
     }
     else {
         funModsPlaceholders.forEach((elem) => elem.innerHTML = "{" + level.value + "}")
     }
+}
+
+function setForm(formState) {
+    console.log(formState)
+    level.value = formState.level;
+    type.value = formState.type;
+    let startVal = ""
+    if (formState.starting_nodes.length == 1) {
+        startVal = formState.starting_nodes[0];
+    } 
+    else if (formState.starting_nodes.length > 1) {
+        startVal = "TODO" 
+    }
+    starting.value = startVal;
+    adjustLevelLabelsOnForm();
+    
 }
 
 

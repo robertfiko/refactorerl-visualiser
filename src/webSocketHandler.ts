@@ -101,6 +101,8 @@ export class WebSocketHandler {
 
 					this.subscribe("error", (data) => { vscode.window.showErrorMessage("Error: " + String(data)); });
 
+
+
 				} catch (error) {
 					reject(error);
 				}

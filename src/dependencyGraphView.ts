@@ -89,6 +89,8 @@ export class DependencyGraphView {
 			null,
 			this._disposables
 		);
+
+		
 	}
 
 	public dispose() {
@@ -103,6 +105,14 @@ export class DependencyGraphView {
 				x.dispose();
 			}
 		}
+	}
+
+	public setForm(param: {level: string, type: string, starting_nodes?: string}) {
+		this.panel.webview.postMessage({ command: 'setForm', data: param });
+	}
+
+	public setTextualGraph(graph: any) {
+		this.panel.webview.postMessage({ command: 'printTextualGraph', graph: graph });
 	}
 
 	private async updateContent() {
@@ -163,15 +173,15 @@ export class DependencyGraphView {
 						<form id="graph-properties">
 							<label for="depgraph-level">Level</label>
 							<select name="depgraph-level" id="depgraph-level">
-								<option value="function">Function</option>
-								<option value="module">Module</option>
+								<option value="func">Function</option>
+								<option value="mod">Module</option>
 								<option value="moduleset">Set of modules (!!)</option>
 							</select>
 
 							<label for="depgraph-type">Type</label>
 							<select name="depgraph-type" id="depgraph-type">
-								<option value="whole">Whole graph</option>
-								<option value="cyclic">Cyclics sub-graph</option>
+								<option value="all">Whole graph</option>
+								<option value="cycles">Cyclics sub-graph</option>
 							</select>
 
 							<label for="depgraph-start">Starting <span class="modOrFun">**</span></label>

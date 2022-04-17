@@ -50,6 +50,13 @@ export function activate(context: vscode.ExtensionContext) {
 			})
 		);
 
+		WebSocketHandler.getInstance().subscribe('dependencyGraph', (data) => {
+			DependencyGraphView.createOrShow(context.extensionUri);
+			DependencyGraphView.currentPanel?.setForm(data.params);
+			DependencyGraphView.currentPanel?.setTextualGraph(data.data.data);
+			//data.data the graph
+		});
+
 		if (vscode.window.registerWebviewPanelSerializer) {
 			// Make sure we register a serializer in activation event
 			vscode.window.registerWebviewPanelSerializer(DependencyGraphView.viewType, {
