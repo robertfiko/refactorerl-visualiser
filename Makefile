@@ -1,8 +1,8 @@
 compile-refels:
 	git clone https://github.com/robertfiko/vscode
-	mv vscode vscode-els-referl
+	mv vscode .vscode-els-referl
 	npm install -g vsce
-	cd vscode-els-referl;\
+	cd .vscode-els-referl;\
 		git submodule update --init;\
 		rm -rf erlang_ls/_build;\
 		rm -rf client/out;\
@@ -11,7 +11,7 @@ compile-refels:
 		vsce package --out erlang_ls_with_refactorerl.vsix
 
 refels: compile-refels
-	cd vscode-els-referl;\
+	cd .vscode-els-referl;\
 		code --install-extension erlang_ls_with_refactorerl.vsix --force
 
 visualiser:

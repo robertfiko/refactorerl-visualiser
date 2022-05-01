@@ -12,7 +12,7 @@ module.exports = {
 	],
 	ignorePatterns: [
 		'media',
-		'vscode-els-referl'
+		'.vscode-els-referl'
 	],
 	rules: {
 		'semi': [2, "always"],

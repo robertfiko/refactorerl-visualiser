@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { Data } from 'ws';
 export abstract class ReferlProvider<DataStorageType extends DataStorage, Type extends ReferlTreeItem = ReferlTreeItem> implements vscode.TreeDataProvider<ReferlTreeItem> {
 
 	protected _onDidChangeTreeData: vscode.EventEmitter<Type | undefined | void> = new vscode.EventEmitter<Type | undefined | void>();
@@ -39,24 +38,27 @@ export abstract class ReferlProvider<DataStorageType extends DataStorage, Type e
 		}
 	});
 
-	private static readonly emptyDecoration = vscode.window.createTextEditorDecorationType({});
-
 	static selectTreeItem(rangeDescriptor: RangeDescriptor, decoration: vscode.TextEditorDecorationType, message: string) {
 		const uri = vscode.Uri.file(rangeDescriptor.file);
-		vscode.commands.executeCommand('vscode.open', uri);
+		vscode.commands.executeCommand('vscode.open', uri).then(() => {
+			const activeEditor = vscode.window.activeTextEditor;
+			console.log(activeEditor);
+			if (activeEditor) {
+				const range = new vscode.Range(rangeDescriptor.from, rangeDescriptor.to);
 
-		const activeEditor = vscode.window.activeTextEditor;
-		if (activeEditor) {
-			const range = new vscode.Range(rangeDescriptor.from, rangeDescriptor.to);
+				const deco = { range: range, hoverMessage: message };
+				activeEditor.setDecorations(decoration, [deco]);
+				setTimeout(() => {
+					activeEditor.setDecorations(decoration, []);
+				}, 3000);
+				activeEditor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
 
-			const deco = { range: range, hoverMessage: message };
-			activeEditor.setDecorations(decoration, [deco]);
-			setTimeout(() => {activeEditor.setDecorations(this.emptyDecoration, []); console.log("REMOVED");}, 3000);
-			activeEditor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+				const newSelection = new vscode.Selection(rangeDescriptor.from, rangeDescriptor.from);
+				activeEditor.selection = newSelection;
+			}
+		});
 
-			const newSelection = new vscode.Selection(rangeDescriptor.from, rangeDescriptor.from);
-			activeEditor.selection = newSelection;
-		}
+		
 	}
 }
 
@@ -82,31 +84,70 @@ export class RangeCommand implements vscode.Command {
 	constructor(
 		public readonly title: string,
 		public readonly command: string,
-		origin: RangeDescriptor
+		item: RangeDescriptor
 	) {
-		this.arguments = [origin];
+		this.arguments = [item];
 	}
 	tooltip?: string | undefined;
 	arguments?: any[] | undefined;
 }
 
-export class RangeDescriptor {
+interface ItemDescriptor {
+	value: string;
+	file: string;
+	readonly hasRange: boolean;
+}
+
+export class RangeDescriptor implements ItemDescriptor {
 	public readonly from: vscode.Position;
 	public readonly to: vscode.Position;
 	public readonly value: string;
 	public readonly file: string;
+	public readonly hoverInfo: string;
 
-	constructor (raw: [number, number, number, number, string], file: string)  {
-		this.from = new vscode.Position(raw[0]-1, raw[1]-1);
-		this.to = new vscode.Position(raw[2]-1, raw[3]);
-		this.value = raw[4];
+	constructor (	fromLine: number, 
+					fromCol: number, 
+					toLine: number, 
+					toCol: number, 
+					value: string, 
+					file: string,
+					hoverInfo: string)  {
+		this.from = new vscode.Position(fromLine-1, fromCol-1);
+		this.to = new vscode.Position(toLine-1, toCol);
+		this.value = value;
 		this.file = file;
+		this.hoverInfo = hoverInfo;
+	}
+	public readonly hasRange = true;
+}
+
+export class NoPosDescriptor implements ItemDescriptor {
+	public readonly value: string;
+	public readonly file: string;
+	public readonly hoverInfo: string;
+
+	constructor (   value: string, 
+					file: string,
+					hoverInfo: string)  {
+		this.value = value;
+		this.file = file;
+		this.hoverInfo = hoverInfo;
 	}
 
+	public readonly hasRange = false;
+}
+
+
+export type ResponseItem = {
+	fromPosLn: number,
+	fromPosCol: number,
+	toPosLn: number,
+	toPosCol: number,
+	name: string,
+	hoverInfo: string
+	file: string
 }
 
 export interface DataStorage { 
 	updateData(data: any): void;
-
-
 }

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { DataStorage, RangeCommand, RangeDescriptor, ReferlProvider, ReferlTreeItem } from './refactorErlTreeView';
+import { DataStorage, RangeCommand, RangeDescriptor, ReferlProvider, ReferlTreeItem, ResponseItem } from './refactorErlTreeView';
 export class CustomQueryProvider extends ReferlProvider<CustomQueryDataStorage> {
 	protected data: CustomQueryDataStorage;
 
@@ -21,7 +21,7 @@ export class CustomQueryProvider extends ReferlProvider<CustomQueryDataStorage> 
 			const items = new Array<CustomQuerySubTreeItem>();
 
 			for (const result of results) {
-				const item = new CustomQuerySubTreeItem(result.value, "?", vscode.TreeItemCollapsibleState.None, result);
+				const item = new CustomQuerySubTreeItem(result.value, "", vscode.TreeItemCollapsibleState.None, result);
 				items.push(item);
 			}
 
@@ -58,8 +58,18 @@ export class CustomQuerySubTreeItem extends ReferlTreeItem {
 	}
 }
 
+type ResponseWrapper = {
+	file: string,
+	items: ResponseItem[]
+}
+
+type CustomQueryDataResponse = {
+	request: string
+	response: ResponseWrapper[];
+}
+
 class CustomQueryDataStorage implements DataStorage {
-	private data: any //JSON
+	private data!: CustomQueryDataResponse;
 
 	public updateData(data: any) {
 		this.data = data;
@@ -67,15 +77,6 @@ class CustomQueryDataStorage implements DataStorage {
 
 	private valid(): boolean {
 		return this.data != undefined;
-	}
-
-	public file(): string {
-		if (this.valid()) {
-			return this.data.file;
-		}
-		else {
-			return "";
-		}
 	}
 
 	public request(): string {
@@ -86,10 +87,14 @@ class CustomQueryDataStorage implements DataStorage {
 	}
 	
 	public files(): string[] {
+		console.log("XD");
+		
+		console.log(this.data);
+		
 		if (this.valid()) {
 			const items = [];
 			for (const item of this.data.response) {
-				items.push(item[0]);
+				items.push(item.file);
 			}
 			return items;
 		}
@@ -100,33 +105,29 @@ class CustomQueryDataStorage implements DataStorage {
 
 	public getResultsInFile(fileName: string): RangeDescriptor[] {
 		if (this.valid()) {
-			let results = [];
+			let results: ResponseItem[] = [];
 			for (const item of this.data.response) {
-				if (item[0] == fileName) {
-					results = item[1];
+				if (item.file == fileName) {
+					results = item.items;
 					break;
 				}
 			}
 
 			const items = [];
 			for (const result of results) {
-				items.push(new RangeDescriptor(result, result[5]));
+				items.push(new RangeDescriptor(
+					result.fromPosLn,
+					result.fromPosCol,
+					result.toPosLn,
+					result.toPosCol,
+					result.name,
+				result.file, "Custom Query Result"));
 			}
 
 			return items;
 		}
 		else {
 			return [];
-		}
-	}
-
-
-	public variableName(): string {
-		if (this.valid()) {
-			return this.data.variableName;
-		}
-		else {
-			return "";
 		}
 	}
 

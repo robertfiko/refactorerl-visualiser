@@ -2,8 +2,17 @@ import { rejects } from 'assert';
 import * as vscode from 'vscode';
 import { WebSocketHandler } from './webSocketHandler';
 
+type FormState = { 
+	level: string,
+	type: string,
+	starting_nodes: string,
+	exclude_otp: boolean
+};
+
 class ViewState {
 	public textualGraph: any;
+	public formState: FormState | undefined;
+	public excludeOpt: boolean | any
 }
 export class DependencyGraphView {
 	public static currentPanel: DependencyGraphView | undefined;
@@ -70,8 +79,10 @@ export class DependencyGraphView {
 					responsePromise.then(
 						(resolvedData) => {
 							if (resolvedData.status == "ok") {
-								this.state.textualGraph = resolvedData.data;
-								this.panel.webview.postMessage({ command: 'printTextualGraph', graph: resolvedData.data });
+								
+								//console.log(resolvedData.data);
+								console.log("SZILVA");
+								this.setTextualGraph(resolvedData.data);
 							}
 							else {
 								vscode.window.showErrorMessage(resolvedData.data);
@@ -84,6 +95,9 @@ export class DependencyGraphView {
 							this.panel.webview.postMessage({ command: 'textualGraphError', error: "Graph request error: " + rejectCause });
 						}
 					);
+				}
+				else if (message.command == "formState") {
+					this.state.formState = message.params;
 				}
 			},
 			null,
@@ -107,11 +121,17 @@ export class DependencyGraphView {
 		}
 	}
 
-	public setForm(param: {level: string, type: string, starting_nodes?: string}) {
-		this.panel.webview.postMessage({ command: 'setForm', data: param });
+	public setForm(param: FormState | undefined) {
+		if (param) {
+			this.state.formState = param;
+			console.log(param);
+			this.panel.webview.postMessage({ command: 'setForm', data: param });
+		}
+		
 	}
 
 	public setTextualGraph(graph: any) {
+		this.state.textualGraph = graph;
 		this.panel.webview.postMessage({ command: 'printTextualGraph', graph: graph });
 	}
 
@@ -141,8 +161,13 @@ export class DependencyGraphView {
 		const nonce = DependencyGraphView.getNonce();
 
 		//Get data back from state
+		console.log("ALMA");
+		console.log(this.state);
+		
+		
 		if (this.state.textualGraph) {
-			this.panel.webview.postMessage({ command: 'printTextualGraph', graph: this.state.textualGraph });
+			this.setTextualGraph(this.state.textualGraph);			
+			this.setForm(this.state.formState);
 		}
 
 		return `
@@ -184,26 +209,25 @@ export class DependencyGraphView {
 								<option value="cycles">Cyclics sub-graph</option>
 							</select>
 
+							<small>Separate by ;</small><br>
 							<label for="depgraph-start">Starting <span class="modOrFun">**</span></label>
 							<input id="depgraph-start" type="text" name="depgraph-start" placeholder="module:fun/1">
-							<small>Separate by ;</small><br>
 							
+							<label for="depgraph-connection">Connection <span class="modOrFun">**</span> (??)</label>
+							<input id="depgraph-connection" type="text" name="depgraph-connection">
 
-							<label for="depgraph-connection">Connection <span class="modOrFun">**</span> (!!)</label>
-							<input type="text" name="depgraph-connection">
+							<label for="depgraph-excluded">Excluded <span class="modOrFun">**</span> (??)</label>
+							<input id="depgraph-excluded" type="text" name="depgraph-excluded">
 
-							<label for="depgraph-excluded">Excluded <span class="modOrFun">**</span> (!!)</label>
-							<input type="text" name="depgraph-excluded">
-
-							<input type="checkbox" name="vehicle1" value="exclude-otp">
-							  <label for="vehicle1">Exclude OTP (!!)</label><br>
+							<input type="checkbox" name="exclude-otp" value="exclude-otp" id="exclude-otp">
+							  <label for="exclude-otp">Exclude OTP</label><br>
 
 							<p>Excluded libraries (!!)</p>
 
+							<label for="depgraph-excluded">Excluded libraries (!!)Excluded libraries (!!)</label>
+							<input id="depgraph-connection" type="text" name="depgraph-connection">
+
 							<p>Output format (!!)</p>
-
-
-
 
 							<button type="button" id="graph-properties-generate">Generate</button>
 							<button type="button" id="clear">Clear</button>
@@ -216,9 +240,6 @@ export class DependencyGraphView {
 					</td>
 				</tr>
 			</table>
-
-			<h1 id="refac">NO</h1>
-
 			<script nonce="${nonce}" src="${scriptUri}"></script>
 		</body>
 		

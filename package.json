@@ -16,7 +16,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onView:variableOrigin",
+		"onView:variableView",
 		"onView:referlDashboard",
 		"onCommand:refactorErl.dependencyGraph",
 		"onCommand:refactorErl.query",
@@ -52,8 +52,8 @@
 					"name": "RefactorErl dashboard"
 				},
 				{
-					"id": "variableOrigin",
-					"name": "Variable Origin"
+					"id": "variableView",
+					"name": "Variable Origin & Reach"
 				},
 				{
 					"id": "customQuery",
@@ -73,7 +73,7 @@
 				"when": "!refactorErl.nodeReachable"
 			},
 			{
-				"view": "variableOrigin",
+				"view": "variableView",
 				"contents": "Try setting to coursor into a varialbe and use the Code Action (small lamps) to execute. \n\n The result will appear here.",
 				"when": "!refactorErl.treeViewActive"
 			}

@@ -4,16 +4,16 @@
 
 const vscode = acquireVsCodeApi();
 const oldState = (vscode.getState());
-const refacState = (document.getElementById('refac'));
 const graphView = (document.getElementById('view-column'));
 
 /* Form elements */
 const funModsPlaceholders = document.querySelectorAll(".modOrFun");
-
 const level = document.getElementById('depgraph-level');
 const type = document.getElementById('depgraph-type');
 const starting = document.getElementById('depgraph-start')
+const exclude_otp = document.getElementById('exclude-otp') 
 
+// Buttons
 const generateButton = (document.getElementById('graph-properties-generate'));
 const clearButton = (document.getElementById('clear'));
 
@@ -35,15 +35,23 @@ generateButton.addEventListener('click', (event) => {
         startingValue = startingArr;
     }
 
+    console.log(exclude_otp)
     const graphParams = {
         type: type.value,
         level: level.value,
-        starting_nodes: startingValue
+        starting_nodes: startingValue ? startingValue : [],
+        exclude_otp: exclude_otp.checked
     }
+    console.log(graphParams)
 
     vscode.postMessage({
         command: 'dependecyGraph',
         params: graphParams,
+    })
+
+    vscode.postMessage({
+        command: 'formState',
+        params: graphParams
     })
 });
 
@@ -54,6 +62,7 @@ window.addEventListener('message', event => {
         case 'updateResponse':
             break;
         case 'printTextualGraph':
+            console.log(message.graph);
             printTextualGraph(message.graph)
             break;
         case 'textualGraphError':
@@ -61,18 +70,8 @@ window.addEventListener('message', event => {
             let h2 = document.createElement('h2');
             h2.innerHTML = message.error;
             graphView.appendChild(h2);
-        case 'setForm':
-            console.log(message.data);
-            const formRaw = message.data;
-            const formState = {
-                level: formRaw.level,
-                type: formRaw.type,
-                starting_nodes: [formRaw.starting_nodes]
-            }
-            console.log(formState)
-            setForm(formState);
-
-            //TODO send back form state for saving GOT STATE??
+        case 'setForm':            
+            setForm(message.data);
             break;
     }
 });
@@ -120,15 +119,17 @@ function adjustLevelLabelsOnForm() {
 }
 
 function setForm(formState) {
+    console.log("Set form:");
     console.log(formState)
     level.value = formState.level;
     type.value = formState.type;
+    exclude_otp.checked = formState.exclude_otp
     let startVal = ""
     if (formState.starting_nodes.length == 1) {
         startVal = formState.starting_nodes[0];
     } 
     else if (formState.starting_nodes.length > 1) {
-        startVal = "TODO" 
+        startVal = separateContent(formState.starting_nodes)
     }
     starting.value = startVal;
     adjustLevelLabelsOnForm();
@@ -136,6 +137,14 @@ function setForm(formState) {
 }
 
 
+function separateContent(content) {
+    let ret = ""
+    for (let index = 0; index < content.length - 1; index++) {
+        ret += content[index] + "; "
+    }
+    ret += content[content.length - 1]
+    return ret
+}
 
 /* Init */
 adjustLevelLabelsOnForm();

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { CustomQueryProvider } from './customQuery';
 import { RangeDescriptor } from './refactorErlTreeView';
 import { DependencyGraphView } from './dependencyGraphView';
-import { VariableOriginProvider } from './variableOrigin';
+import { VariableViewProvider } from './variableTreeView';
 import { WebSocketHandler } from './webSocketHandler';
 
 //TODO: CODE
@@ -17,17 +17,17 @@ export function activate(context: vscode.ExtensionContext) {
 	// If there is an opened workspace, than activate
 	if (workspaceUri) {
 
-		const variableOriginProvider = new VariableOriginProvider();
-		WebSocketHandler.getInstance().subscribe('variableOrigin', (eventData) => { variableOriginProvider.refresh(eventData); });
-		vscode.window.registerTreeDataProvider('variableOrigin', variableOriginProvider);
+		const variableViewProvider = new VariableViewProvider();
+		WebSocketHandler.getInstance().subscribe('variableView', (eventData) => { variableViewProvider.refresh(eventData); });
+		vscode.window.registerTreeDataProvider('variableView', variableViewProvider);
 		context.subscriptions.push(
-			vscode.commands.registerCommand('variableOrigin.goToLocation', (origin: RangeDescriptor) => VariableOriginProvider.selectOriginItem(origin))
+			vscode.commands.registerCommand('variableView.goToLocation', (item: RangeDescriptor) => VariableViewProvider.selectTreeItem(item))
 		);
 
 		const customQueryProvider = new CustomQueryProvider();
 		vscode.window.registerTreeDataProvider('customQuery', customQueryProvider);
 		context.subscriptions.push(
-			vscode.commands.registerCommand('customQuery.goToLocation', (origin: RangeDescriptor) => CustomQueryProvider.selectResultItem(origin))
+			vscode.commands.registerCommand('customQuery.goToLocation', (item: RangeDescriptor) => CustomQueryProvider.selectResultItem(item))
 		);
 
 		context.subscriptions.push(
@@ -45,7 +45,7 @@ export function activate(context: vscode.ExtensionContext) {
 		);
 
 		context.subscriptions.push(
-			vscode.commands.registerCommand('refactorErl.dependencyGraph', () => {
+			vscode.commands.registerCommand('refactorErl.dependencyGraph', (data) => {
 				DependencyGraphView.createOrShow(context.extensionUri);
 			})
 		);
@@ -53,6 +53,8 @@ export function activate(context: vscode.ExtensionContext) {
 		WebSocketHandler.getInstance().subscribe('dependencyGraph', (data) => {
 			DependencyGraphView.createOrShow(context.extensionUri);
 			DependencyGraphView.currentPanel?.setForm(data.params);
+			//console.log(data.data.data);
+			console.log(DependencyGraphView.currentPanel);
 			DependencyGraphView.currentPanel?.setTextualGraph(data.data.data);
 			//data.data the graph
 		});
@@ -94,6 +96,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 							}
 							else {
+								console.log(value);
 								vscode.window.showErrorMessage(`Error with request: ${result} `);
 							}
 

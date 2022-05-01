@@ -5,7 +5,7 @@ import { rejects } from "assert";
 
 export class WebSocketHandler {
 	private static instance: WebSocketHandler;
-	private socket: WebSocket;
+	private socket!: WebSocket;
 	private subs: Map<string, ((param: any) => void)[]>;
 	private reqIdsubs: Map<string, (param: any) => void>;
 	private uri: string;
@@ -27,7 +27,7 @@ export class WebSocketHandler {
 		this.reqIdsubs = new Map<string, ((param: any) => void)>();
 		this.uri = 'ws://127.0.0.1:8002/vsc_api.yaws';
 
-		this.socket = new WebSocket(this.uri);
+		//this.socket = new WebSocket(this.uri); //todo: this creates a second WS
 		this.connect();
 	}
 
