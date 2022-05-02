@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { CustomQueryProvider } from './customQuery';
-import { RangeDescriptor } from './refactorErlTreeView';
+import { NoPosDescriptor, RangeDescriptor } from './refactorErlTreeView';
 import { DependencyGraphView } from './dependencyGraphView';
 import { VariableViewProvider } from './variableTreeView';
 import { WebSocketHandler } from './webSocketHandler';
@@ -22,6 +22,10 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.registerTreeDataProvider('variableView', variableViewProvider);
 		context.subscriptions.push(
 			vscode.commands.registerCommand('variableView.goToLocation', (item: RangeDescriptor) => VariableViewProvider.selectTreeItem(item))
+		);
+
+		context.subscriptions.push(
+			vscode.commands.registerCommand('customQuery.noPosNotify', (item: NoPosDescriptor) => vscode.window.showInformationMessage("Corresponding source file is not loaded"))
 		);
 
 		const customQueryProvider = new CustomQueryProvider();

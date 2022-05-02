@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { DataStorage, RangeCommand, RangeDescriptor, ReferlProvider, ReferlTreeItem, ResponseItem } from './refactorErlTreeView';
+import { DataStorage, ItemDescriptor, NoPosDescriptor, NotificationCommand, RangeCommand, RangeDescriptor, ReferlProvider, ReferlTreeItem, ResponseItem } from './refactorErlTreeView';
 export class CustomQueryProvider extends ReferlProvider<CustomQueryDataStorage> {
 	protected data: CustomQueryDataStorage;
 
@@ -21,7 +21,7 @@ export class CustomQueryProvider extends ReferlProvider<CustomQueryDataStorage> 
 			const items = new Array<CustomQuerySubTreeItem>();
 
 			for (const result of results) {
-				const item = new CustomQuerySubTreeItem(result.value, "", vscode.TreeItemCollapsibleState.None, result);
+				const item = new CustomQuerySubTreeItem(result.title, result.subtitle, vscode.TreeItemCollapsibleState.None, result);
 				items.push(item);
 			}
 
@@ -44,17 +44,27 @@ export class CustomQueryProvider extends ReferlProvider<CustomQueryDataStorage> 
 }
 
 export class CustomQuerySubTreeItem extends ReferlTreeItem {
+	public readonly command: vscode.Command;
+
 	constructor(
 		public readonly label: string,
 		version: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-		public readonly result: RangeDescriptor,
+		public readonly result: ItemDescriptor,
+		command = undefined,
 		public readonly iconPath = {
 			light: path.join(__filename, '..', '..', 'resources', 'light', 'number.svg'),
 			dark: path.join(__filename, '..', '..', 'resources', 'dark', 'number.svg')
-		}
+		},
 	) {
-		super(label, version, collapsibleState, new RangeCommand('Go To Location', 'customQuery.goToLocation', result), iconPath);
+		super(label, version, collapsibleState, command, iconPath);
+
+		if (result.hasRange) {
+			this.command = new RangeCommand(result);
+		}
+		else {
+			this.command = new NotificationCommand(result);
+		}
 	}
 }
 
@@ -103,7 +113,7 @@ class CustomQueryDataStorage implements DataStorage {
 		}
 	}
 
-	public getResultsInFile(fileName: string): RangeDescriptor[] {
+	public getResultsInFile(fileName: string): ItemDescriptor[] {
 		if (this.valid()) {
 			let results: ResponseItem[] = [];
 			for (const item of this.data.response) {
@@ -113,15 +123,21 @@ class CustomQueryDataStorage implements DataStorage {
 				}
 			}
 
-			const items = [];
+			const items: ItemDescriptor[] = [];
 			for (const result of results) {
-				items.push(new RangeDescriptor(
-					result.fromPosLn,
-					result.fromPosCol,
-					result.toPosLn,
-					result.toPosCol,
-					result.name,
-				result.file, "Custom Query Result"));
+				if (result.noPos) {
+					items.push(new NoPosDescriptor(result.name)); 
+				}
+				else {
+					items.push(new RangeDescriptor(
+						result.fromPosLn,
+						result.fromPosCol,
+						result.toPosLn,
+						result.toPosCol,
+						result.name,
+					result.file, "Custom Query Result"));
+				}
+				
 			}
 
 			return items;

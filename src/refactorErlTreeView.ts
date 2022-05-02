@@ -81,57 +81,74 @@ export class ReferlTreeItem extends vscode.TreeItem {
 
 
 export class RangeCommand implements vscode.Command {
+	public readonly command: string;
+	public readonly title: string;
 	constructor(
-		public readonly title: string,
-		public readonly command: string,
-		item: RangeDescriptor
+		item: ItemDescriptor
 	) {
 		this.arguments = [item];
+		this.command = "customQuery.goToLocation";
+		this.title = "Go To Location";
 	}
 	tooltip?: string | undefined;
 	arguments?: any[] | undefined;
 }
 
-interface ItemDescriptor {
-	value: string;
-	file: string;
+export class NotificationCommand implements vscode.Command {
+	public readonly command: string;
+	public readonly title: string;
+	constructor(
+		item: ItemDescriptor
+	) {
+		this.arguments = [item];
+		this.command = "customQuery.noPosNotify";
+		this.title = "Corresponding source file is not loaded";
+	}
+	tooltip?: string | undefined;
+	arguments?: any[] | undefined;
+}
+
+
+
+export interface ItemDescriptor {
+	readonly title: string;
 	readonly hasRange: boolean;
+	readonly subtitle: string;
+	
 }
 
 export class RangeDescriptor implements ItemDescriptor {
 	public readonly from: vscode.Position;
 	public readonly to: vscode.Position;
-	public readonly value: string;
+	public readonly title: string;
 	public readonly file: string;
 	public readonly hoverInfo: string;
+	public readonly subtitle: string;
 
 	constructor (	fromLine: number, 
 					fromCol: number, 
 					toLine: number, 
 					toCol: number, 
-					value: string, 
+					title: string, 
 					file: string,
 					hoverInfo: string)  {
 		this.from = new vscode.Position(fromLine-1, fromCol-1);
 		this.to = new vscode.Position(toLine-1, toCol);
-		this.value = value;
+		this.title = title;
 		this.file = file;
 		this.hoverInfo = hoverInfo;
+		this.subtitle = "";
 	}
 	public readonly hasRange = true;
 }
 
 export class NoPosDescriptor implements ItemDescriptor {
-	public readonly value: string;
-	public readonly file: string;
-	public readonly hoverInfo: string;
+	public readonly title: string;
+	public readonly subtitle: string;
 
-	constructor (   value: string, 
-					file: string,
-					hoverInfo: string)  {
-		this.value = value;
-		this.file = file;
-		this.hoverInfo = hoverInfo;
+	constructor (   title: string )  {
+		this.title = title;
+		this.subtitle = "No source file";
 	}
 
 	public readonly hasRange = false;
@@ -144,8 +161,9 @@ export type ResponseItem = {
 	toPosLn: number,
 	toPosCol: number,
 	name: string,
-	hoverInfo: string
-	file: string
+	hoverInfo: string,
+	file: string,
+	noPos: boolean
 }
 
 export interface DataStorage { 

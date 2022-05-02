@@ -25,7 +25,7 @@ export class VariableViewProvider extends ReferlProvider<VarialbeDataStorage> {
 			const displayItems = new Array<SubTreeItem>();
 
 			for (const item of items) {
-				const displayItem = new SubTreeItem(item.value, module, vscode.TreeItemCollapsibleState.None, item);
+				const displayItem = new SubTreeItem(item.title, module, vscode.TreeItemCollapsibleState.None, item);
 				displayItems.push(displayItem);
 			}
 
@@ -59,7 +59,7 @@ export class SubTreeItem extends ReferlTreeItem {
 			dark: path.join(__filename, '..', '..', 'resources', 'dark', 'number.svg')
 		}
 	) {
-		super(label, version, collapsibleState, new RangeCommand('Go To Location', 'variableView.goToLocation', result), iconPath);
+		super(label, version, collapsibleState, new RangeCommand(result), iconPath);
 	}
 }
 
