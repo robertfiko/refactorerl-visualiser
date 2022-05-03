@@ -1,6 +1,8 @@
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
 
+import { TextualGraph } from "./depgraph";
+
 const vscode = acquireVsCodeApi();
 const oldState = (vscode.getState());
 const graphView = (document.getElementById('view-column')) as HTMLElement;
@@ -64,7 +66,7 @@ function sendGraphRequest(event: MouseEvent) {
     console.log(graphParams);
 
     vscode.postMessage({
-        command: 'dependecyGraph',
+        command: 'dependencyGraph',
         params: graphParams,
     });
 
@@ -106,7 +108,7 @@ function clearForm(event: MouseEvent) {
     graphView.innerHTML = "";
 }
 
-function printTextualGraph(graph: any) {
+function printTextualGraph(graph: TextualGraph[]) {
     console.log(graph);
     graphView.innerHTML = "";
     for (const elem of graph) {

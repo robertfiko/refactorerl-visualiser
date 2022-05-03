@@ -1,6 +1,6 @@
-import { rejects } from 'assert';
 import * as vscode from 'vscode';
 import { WebSocketHandler } from './webSocketHandler';
+import { TextualGraph } from "./depgraphView/depgraph";
 
 type FormState = { 
 	level: string,
@@ -74,7 +74,7 @@ export class DependencyGraphView {
 		// Handle messages from the webview
 		this.panel.webview.onDidReceiveMessage(
 			async (message) => {
-				if (message.command == "dependecyGraph") {
+				if (message.command == "dependencyGraph") {
 					const responsePromise = WebSocketHandler.getInstance().request("dependencyGraph", message.params);
 					responsePromise.then(
 						(resolvedData) => {
@@ -130,7 +130,7 @@ export class DependencyGraphView {
 		
 	}
 
-	public setTextualGraph(graph: any) {
+	public setTextualGraph(graph: TextualGraph) {
 		this.state.textualGraph = graph;
 		this.panel.webview.postMessage({ command: 'printTextualGraph', graph: graph });
 	}
@@ -144,13 +144,13 @@ export class DependencyGraphView {
 
 	private async getHtmlForWebview(webview: vscode.Webview) {
 		// Generate URI to be able  to load from webview
-		const scriptPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'out', 'main.js');
+		const scriptPath = vscode.Uri.joinPath(this.extensionUri, 'out', 'webview', 'main.js');
 		const scriptUri = (scriptPath).with({ 'scheme': 'vscode-resource' });
 
 		// Local path to css styles
-		const styleResetPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'out', 'reset.css');
-		const stylesPathMainPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'out', 'vscode.css');
-		const stylesCustomPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'out', 'custom.css');
+		const styleResetPath = vscode.Uri.joinPath(this.extensionUri, 'out', 'webview', 'reset.css');
+		const stylesPathMainPath = vscode.Uri.joinPath(this.extensionUri, 'out', 'webview', 'vscode.css');
+		const stylesCustomPath = vscode.Uri.joinPath(this.extensionUri, 'out', 'webview', 'custom.css');
 
 		// Uri to load styles into webview
 		const stylesResetUri = webview.asWebviewUri(styleResetPath);
@@ -252,9 +252,7 @@ export class DependencyGraphView {
 		return {
 			// Enable javascript in the webview
 			enableScripts: true,
-
-			// And restrict the webview to only loading content from our extension's `media` directory.
-			localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media', 'out')]
+			localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'out', 'webview')]
 		};
 	}
 

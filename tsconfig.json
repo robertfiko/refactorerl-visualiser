@@ -1,6 +1,6 @@
 {
 	"references": [
-		{ "path": "resources/depgraphView/tsconfig.json" }
+		{ "path": "src/depgraphView/tsconfig.json" }
 	],
 	"compilerOptions": {
 		"module": "commonjs",
