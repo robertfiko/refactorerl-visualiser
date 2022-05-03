@@ -144,7 +144,7 @@ export class DependencyGraphView {
 
 	private async getHtmlForWebview(webview: vscode.Webview) {
 		// Generate URI to be able  to load from webview
-		const scriptPath = vscode.Uri.joinPath(this.extensionUri, 'out', 'webview', 'main.js');
+		const scriptPath = vscode.Uri.joinPath(this.extensionUri, 'out', 'webview', 'webviewMain.js');
 		const scriptUri = (scriptPath).with({ 'scheme': 'vscode-resource' });
 
 		// Local path to css styles
