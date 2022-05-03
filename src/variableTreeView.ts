@@ -14,8 +14,6 @@ export class VariableViewProvider extends ReferlProvider<VarialbeDataStorage> {
 	}
 
 	getChildren(element?: ReferlTreeItem): Thenable<ReferlTreeItem[]> {
-		const file = this.data.file();
-		const module = path.basename(file);
 		const variableName = this.data.variableName();
 
 		// Filling up children
@@ -25,6 +23,7 @@ export class VariableViewProvider extends ReferlProvider<VarialbeDataStorage> {
 			const displayItems = new Array<SubTreeItem>();
 
 			for (const item of items) {
+				const module = path.basename(item.file);
 				const displayItem = new SubTreeItem(item.title, module, vscode.TreeItemCollapsibleState.None, item);
 				displayItems.push(displayItem);
 			}
@@ -65,7 +64,6 @@ export class SubTreeItem extends ReferlTreeItem {
 
 type VariableDataResponse = {
 	items: ResponseItem[]
-	file: string
 	variableName: string
 }
 
@@ -91,7 +89,7 @@ class VarialbeDataStorage implements DataStorage {
 					varItem.toPosLn, 
 					varItem.toPosCol,
 					varItem.name, 
-					this.file(), 
+					varItem.file, 
 					varItem.hoverInfo)
 					);
 			}
@@ -101,14 +99,7 @@ class VarialbeDataStorage implements DataStorage {
 			return [];
 		}
 	}
-	public file(): string {
-		if (this.valid()) {
-			return this.data.file;
-		}
-		else {
-			return "";
-		}
-	}
+	
 	
 	public variableName(): string {
 		if (this.valid()) {
