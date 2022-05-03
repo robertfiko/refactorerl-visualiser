@@ -144,13 +144,13 @@ export class DependencyGraphView {
 
 	private async getHtmlForWebview(webview: vscode.Webview) {
 		// Generate URI to be able  to load from webview
-		const scriptPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'main.js');
+		const scriptPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'out', 'main.js');
 		const scriptUri = (scriptPath).with({ 'scheme': 'vscode-resource' });
 
 		// Local path to css styles
-		const styleResetPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'reset.css');
-		const stylesPathMainPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'vscode.css');
-		const stylesCustomPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'custom.css');
+		const styleResetPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'out', 'reset.css');
+		const stylesPathMainPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'out', 'vscode.css');
+		const stylesCustomPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'out', 'custom.css');
 
 		// Uri to load styles into webview
 		const stylesResetUri = webview.asWebviewUri(styleResetPath);
@@ -213,21 +213,23 @@ export class DependencyGraphView {
 							<label for="depgraph-start">Starting <span class="modOrFun">**</span></label>
 							<input id="depgraph-start" type="text" name="depgraph-start" placeholder="module:fun/1">
 							
-							<label for="depgraph-connection">Connection <span class="modOrFun">**</span> (??)</label>
+							<label for="depgraph-connection">Connection <span class="modOrFun">**</span> (--)</label>
 							<input id="depgraph-connection" type="text" name="depgraph-connection">
 
-							<label for="depgraph-excluded">Excluded <span class="modOrFun">**</span> (??)</label>
+							<label for="depgraph-excluded">Excluded <span class="modOrFun">**</span> (--)</label>
 							<input id="depgraph-excluded" type="text" name="depgraph-excluded">
 
 							<input type="checkbox" name="exclude-otp" value="exclude-otp" id="exclude-otp">
 							  <label for="exclude-otp">Exclude OTP</label><br>
 
-							<p>Excluded libraries (!!)</p>
+							<label for="depgraph-excludedlib">Excluded libraries (--)</label>
+							<input id="depgraph-excludedlib" type="text" name="depgraph-excludedlib">
 
-							<label for="depgraph-excluded">Excluded libraries (!!)Excluded libraries (!!)</label>
-							<input id="depgraph-connection" type="text" name="depgraph-connection">
-
-							<p>Output format (!!)</p>
+							<label for="depgraph-output">Output format (??)</label>
+							<select name="depgraph-output" id="depgraph-output">
+								<option value="textual">Plain textual</option>
+								<option value="svg">SVG</option>
+							</select>
 
 							<button type="button" id="graph-properties-generate">Generate</button>
 							<button type="button" id="clear">Clear</button>
@@ -252,7 +254,7 @@ export class DependencyGraphView {
 			enableScripts: true,
 
 			// And restrict the webview to only loading content from our extension's `media` directory.
-			localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media')]
+			localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media', 'out')]
 		};
 	}
 

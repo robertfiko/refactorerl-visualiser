@@ -1,17 +1,16 @@
 {
-	"references": [
-		{ "path": "resources/depgraphView/tsconfig.json" }
-	],
 	"compilerOptions": {
 		"module": "commonjs",
 		"target": "es2020",
-		"lib": ["es2020"],
-		"outDir": "out",
+		"lib": ["es2020", "dom"],
+		"outDir": "../../media/js",
 		"sourceMap": true,
 		"strict": true,
-		"rootDir": "src",
+		"rootDir": ".",
+		"composite": true
 	},
 	"exclude": ["node_modules", ".vscode-test", ".vscode-els-referl/**/"],
-	"include": ["src/*.ts"]
+	"include": ["*.ts"],
+	
 	
 }
