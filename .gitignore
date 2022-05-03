@@ -4,3 +4,5 @@ out/**
 node_modules/**
 .DS_Store
 *.tsbuildinfo
+
+media/webview/out/**

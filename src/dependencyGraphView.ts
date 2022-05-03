@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { WebSocketHandler } from './webSocketHandler';
-import { TextualGraph } from "./depgraphView/depgraph";
+//import { TextualGraph } from "./depgraphView/depgraph";
 
 type FormState = { 
 	level: string,
@@ -130,7 +130,7 @@ export class DependencyGraphView {
 		
 	}
 
-	public setTextualGraph(graph: TextualGraph) {
+	public setTextualGraph(graph: any) {
 		this.state.textualGraph = graph;
 		this.panel.webview.postMessage({ command: 'printTextualGraph', graph: graph });
 	}
@@ -144,13 +144,13 @@ export class DependencyGraphView {
 
 	private async getHtmlForWebview(webview: vscode.Webview) {
 		// Generate URI to be able  to load from webview
-		const scriptPath = vscode.Uri.joinPath(this.extensionUri, 'out', 'webview', 'webviewMain.js');
+		const scriptPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'webview', 'out', 'webviewMain.js');
 		const scriptUri = (scriptPath).with({ 'scheme': 'vscode-resource' });
 
 		// Local path to css styles
-		const styleResetPath = vscode.Uri.joinPath(this.extensionUri, 'out', 'webview', 'reset.css');
-		const stylesPathMainPath = vscode.Uri.joinPath(this.extensionUri, 'out', 'webview', 'vscode.css');
-		const stylesCustomPath = vscode.Uri.joinPath(this.extensionUri, 'out', 'webview', 'custom.css');
+		const styleResetPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'webview', 'reset.css');
+		const stylesPathMainPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'webview', 'vscode.css');
+		const stylesCustomPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'webview', 'custom.css');
 
 		// Uri to load styles into webview
 		const stylesResetUri = webview.asWebviewUri(styleResetPath);
@@ -159,11 +159,6 @@ export class DependencyGraphView {
 
 		// Use a nonce to only allow specific scripts to be run
 		const nonce = DependencyGraphView.getNonce();
-
-		//Get data back from state
-		console.log("ALMA");
-		console.log(this.state);
-		
 		
 		if (this.state.textualGraph) {
 			this.setTextualGraph(this.state.textualGraph);			
@@ -242,7 +237,7 @@ export class DependencyGraphView {
 					</td>
 				</tr>
 			</table>
-			<script nonce="${nonce}" src="${scriptUri}"></script>
+			<script type="module" nonce="${nonce}" src="${scriptUri}"></script>
 		</body>
 		
 		</html>`;
@@ -252,7 +247,7 @@ export class DependencyGraphView {
 		return {
 			// Enable javascript in the webview
 			enableScripts: true,
-			localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'out', 'webview')]
+			localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media', 'webview',)]
 		};
 	}
 
