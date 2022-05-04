@@ -1,7 +1,7 @@
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
 
-import { TextualGraph } from "./depgraph";
+import { TextualGraph, TextualGraphState } from "./depgraph";
 
 const vscode = acquireVsCodeApi();
 const oldState = (vscode.getState());
@@ -104,7 +104,7 @@ function handleExtensionMessages(event: MessageEvent) {
     }
 }
 
-function clearForm(event: MouseEvent) {
+function clearGraph(event: MouseEvent) {
     graphView.innerHTML = "";
 }
 
@@ -149,30 +149,31 @@ function adjustLevelLabelsOnForm() {
     }
 }
 
-function setForm(formState: any) {
+function setForm(formState: TextualGraphState) {
     level.value = formState.level;
     type.value = formState.type;
     exclude_otp.checked = formState.exclude_otp;
+    starting.value = separateContent(formState.starting_nodes);
+    excluded.value = separateContent(formState.exclude);
+    console.log("HELLOKA");
+    console.log(formState);
+    
+    
+    excludedLib.value = separateContent(formState.exclude_lib);
+    connection.value = separateContent(formState.connection);
 
-
-    let startVal = "";
-    if (formState.starting_nodes.length == 1) {
-        startVal = formState.starting_nodes[0];
-    }
-    else if (formState.starting_nodes.length > 1) {
-        startVal = separateContent(formState.starting_nodes);
-    }
-    starting.value = startVal;
     adjustLevelLabelsOnForm();
-
 }
 
-function separateContent(content: string[]) {
+function separateContent(content: string[]): string {
     let ret = "";
-    for (let index = 0; index < content.length - 1; index++) {
-        ret += content[index] + "; ";
+    if (content.length >= 1 ) {
+        for (let index = 0; index < content.length - 1; index++) {
+            ret += content[index] + "; ";
+        }
+        ret += content[content.length - 1];
     }
-    ret += content[content.length - 1];
+    
     return ret;
 }
 
@@ -181,7 +182,7 @@ function separateContent(content: string[]) {
 //
 
 level.addEventListener('change', adjustLevelLabelsOnForm);
-clearButton.addEventListener('click', clearForm);
+clearButton.addEventListener('click', clearGraph);
 generateButton.addEventListener('click', sendGraphRequest);
 window.addEventListener('message', handleExtensionMessages);
 

@@ -1,18 +1,9 @@
 import * as vscode from 'vscode';
 import { WebSocketHandler } from './webSocketHandler';
-//import { TextualGraph } from "./depgraphView/depgraph";
-
-type FormState = { 
-	level: string,
-	type: string,
-	starting_nodes: string,
-	exclude_otp: boolean
-};
-
+import { TextualGraph, TextualGraphState } from "./depgraphView/depgraph";
 class ViewState {
 	public textualGraph: any;
-	public formState: FormState | undefined;
-	public excludeOpt: boolean | any
+	public formState: TextualGraphState | undefined;
 }
 export class DependencyGraphView {
 	public static currentPanel: DependencyGraphView | undefined;
@@ -121,7 +112,7 @@ export class DependencyGraphView {
 		}
 	}
 
-	public setForm(param: FormState | undefined) {
+	public setForm(param: TextualGraphState | undefined) {
 		if (param) {
 			this.state.formState = param;
 			console.log(param);
@@ -151,11 +142,14 @@ export class DependencyGraphView {
 		const styleResetPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'webview', 'reset.css');
 		const stylesPathMainPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'webview', 'vscode.css');
 		const stylesCustomPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'webview', 'custom.css');
+		const svgTestPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'webview', 'mygraph.svg');
 
 		// Uri to load styles into webview
 		const stylesResetUri = webview.asWebviewUri(styleResetPath);
 		const stylesMainUri = webview.asWebviewUri(stylesPathMainPath);
 		const stylesCustomUri = webview.asWebviewUri(stylesCustomPath);
+		const svgTesturi = webview.asWebviewUri(svgTestPath);
+
 
 		// Use a nonce to only allow specific scripts to be run
 		const nonce = DependencyGraphView.getNonce();
@@ -206,19 +200,22 @@ export class DependencyGraphView {
 
 							<small>Separate by ;</small><br>
 							<label for="depgraph-start">Starting <span class="modOrFun">**</span></label>
-							<input id="depgraph-start" type="text" name="depgraph-start" placeholder="module:fun/1">
+							<input id="depgraph-start" type="text" name="depgraph-start" placeholder="e.g.: module:fun/1">
 							
-							<label for="depgraph-connection">Connection <span class="modOrFun">**</span> (--)</label>
-							<input id="depgraph-connection" type="text" name="depgraph-connection">
+							<small>Separate by ;</small><br>
+							<label for="depgraph-connection">Connection <span class="modOrFun">**</span></label>
+							<input id="depgraph-connection" type="text" name="depgraph-connection" placeholder="e.g.: module:fun/1">
 
-							<label for="depgraph-excluded">Excluded <span class="modOrFun">**</span> (--)</label>
-							<input id="depgraph-excluded" type="text" name="depgraph-excluded">
+							<small>Separate by ;</small><br>
+							<label for="depgraph-excluded">Excluded <span class="modOrFun">**</span></label>
+							<input id="depgraph-excluded" type="text" name="depgraph-excluded" placeholder="e.g.: module:fun/1">
 
 							<input type="checkbox" name="exclude-otp" value="exclude-otp" id="exclude-otp">
 							  <label for="exclude-otp">Exclude OTP</label><br>
 
-							<label for="depgraph-excludedlib">Excluded libraries (--)</label>
-							<input id="depgraph-excludedlib" type="text" name="depgraph-excludedlib">
+							<small>Separate by ;</small><br>
+							<label for="depgraph-excludedlib">Excluded libraries</label>
+							<input id="depgraph-excludedlib" type="text" name="depgraph-excludedlib" placeholder="/path/to/library/">
 
 							<label for="depgraph-output">Output format (??)</label>
 							<select name="depgraph-output" id="depgraph-output">

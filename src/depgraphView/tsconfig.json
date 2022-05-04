@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"target": "es6",
 		"lib": ["dom"],
-		"outDir": "../../media/webview",
+		"outDir": "../../media/webview/out",
 		"rootDir": ".",
 		"composite": true
 	},
