@@ -64,7 +64,7 @@
 		"viewsWelcome": [
 			{
 				"view": "referlDashboard",
-				"contents": "RefactorErl: 🟢  Online \n [Check connection](command:refactorErl.checkConnection)",
+				"contents": "RefactorErl: 🟢  Online \n [Check connection](command:refactorErl.checkConnection) \n [Database Synch](command:refactorErl.databaseSync)",
 				"when": "refactorErl.nodeReachable"
 			},
 			{

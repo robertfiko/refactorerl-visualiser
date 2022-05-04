@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { DataStorage, ItemDescriptor, NoPosDescriptor, NotificationCommand, RangeCommand, RangeDescriptor, ReferlProvider, ReferlTreeItem, ResponseItem } from './refactorErlTreeView';
+import { WebSocketHandler } from './webSocketHandler';
 export class CustomQueryProvider extends ReferlProvider<CustomQueryDataStorage> {
 	protected data: CustomQueryDataStorage;
 
@@ -41,6 +42,53 @@ export class CustomQueryProvider extends ReferlProvider<CustomQueryDataStorage> 
 	static selectResultItem(result: RangeDescriptor) {
 		super.selectTreeItem(result, super.redBackgroundDecoration, 'Custom Query Result');
 	}
+	//TODO: fix this
+	async inputDialogExecuter () {
+			const result = await vscode.window.showInputBox({
+				placeHolder: 'Enter a query, for example: `mods.funs`',
+			});
+			if (result) {
+				vscode.window.withProgress({
+					location: vscode.ProgressLocation.Notification,
+					title: `Running: ${result} `,
+					cancellable: false
+				}, (progress) => {
+
+					const response = WebSocketHandler.getInstance().request('customQueryRequest', result);
+					response.then(
+						(value) => {
+							console.log("SAJT");
+							console.log(value);
+							
+							
+							if (value.status == "ok") {
+								vscode.window.showInformationMessage(`Done: ${result} `);
+								console.log(value);
+								const resp = {
+									response: value.data,
+									request: value.request,
+								};
+
+								console.log(resp);
+								
+
+								super.refresh(resp);
+
+
+							}
+							else {
+								console.log(value);
+								vscode.window.showErrorMessage(`Error with request: ${result} `);
+							}
+
+						},
+						(error) => { vscode.window.showErrorMessage(`Timeout: ${result} `); }
+					);
+
+					return response;
+				});
+			}
+		}
 }
 
 export class CustomQuerySubTreeItem extends ReferlTreeItem {
