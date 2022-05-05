@@ -4,5 +4,6 @@ out/**
 node_modules/**
 .DS_Store
 *.tsbuildinfo
+package-lock.json
 
 media/webview/out/**
