@@ -100,7 +100,7 @@ export class WebSocketHandler {
 					};
 
 					this.subscribe("error", (data) => { vscode.window.showErrorMessage("Error: " + String(data)); });
-
+					this.subscribe("info", (data) => { vscode.window.showInformationMessage(String(data)); });
 
 
 				} catch (error) {

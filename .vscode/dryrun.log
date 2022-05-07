@@ -1,0 +1,14 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory `/Users/fikorobert/Projects/refactorerl-visualiser'
+git clone https://github.com/robertfiko/vscode
+mv vscode .vscode-els-referl
+npm install -g vsce
+cd .vscode-els-referl;\
+		git submodule update --init;\
+		rm -rf erlang_ls/_build;\
+		rm -rf client/out;\
+		npm install;\
+		npm run compile;\
+		vsce package --out erlang_ls_with_refactorerl.vsix
+make: Leaving directory `/Users/fikorobert/Projects/refactorerl-visualiser'
+ 

@@ -1,7 +1,7 @@
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
 
-import { TextualGraph, DependencyGraphState } from "./depgraph";
+import { TextualGraph, DependencyGraphState, ExtensionMessageCommands, ExtensionMessageParam, WebViewMessageParam, WebViewMessageCommands } from "./depgraph";
 
 const vscode = acquireVsCodeApi();
 const oldState = (vscode.getState());
@@ -19,7 +19,7 @@ const connection = document.getElementById('depgraph-connection') as HTMLInputEl
 const excluded = document.getElementById('depgraph-excluded') as HTMLInputElement;
 const exclude_otp = document.getElementById('exclude-otp') as HTMLInputElement;
 const excludedLib = document.getElementById('depgraph-excludedlib') as HTMLInputElement;
-const outputFormat = document.getElementById('depgraph-output') as HTMLSelectElement;
+const outputType = document.getElementById('depgraph-output') as HTMLSelectElement;
 
 /* Buttons */
 const generateButton = (document.getElementById('graph-properties-generate')) as HTMLButtonElement;
@@ -47,6 +47,10 @@ function semicolonSeparatedToArray(value: string) {
     return returnValue;
 }
 
+function postMessage(param: WebViewMessageParam) {
+    vscode.postMessage(param);
+}
+
 function sendGraphRequest(event: MouseEvent) {
     const startingValue = semicolonSeparatedToArray(starting.value);
     const excludeValue = semicolonSeparatedToArray(excluded.value);
@@ -62,24 +66,23 @@ function sendGraphRequest(event: MouseEvent) {
         exclude: excludeValue,
         exclude_lib: excludeLibValue,
         connection: connectionValue,
-        output_type: outputFormat.value
+        output_type: outputType.value
     };
-    console.log(graphParams);
 
-    vscode.postMessage({
+    postMessage({
         command: 'dependencyGraph',
         params: graphParams,
     });
 
-    vscode.postMessage({
+    postMessage({
         command: 'formState',
         params: graphParams
     });
 }
 
 function handleExtensionMessages(event: MessageEvent) {
-    const message = event.data; // The json data that the extension sent
-    switch (message.command) {
+    const message = event.data as ExtensionMessageParam; // The json data that the extension sent
+    switch (message.command as ExtensionMessageCommands) {
         case 'updateResponse': {
             break;
         }
@@ -100,6 +103,30 @@ function handleExtensionMessages(event: MessageEvent) {
         case 'setForm': {
             setForm(message.data);
             break;
+        }
+
+        case 'svgGraphPath': {
+            graphView.innerHTML = "";
+            const h2 = document.createElement('h3');
+            h2.innerHTML = "Graph is already generated for this request. Click the button below to open it.";
+
+            const button = document.createElement('button');
+            button.innerHTML = "Open Graph";
+            button.addEventListener('click', () => {
+                postMessage({
+                    command: 'openSvg',
+                    params: message.path,
+                });
+            });
+
+            const small = document.createElement('small');
+            small.innerHTML = message.path;
+
+            graphView.appendChild(h2);
+            graphView.appendChild(document.createElement('br'));
+            graphView.appendChild(button);
+            graphView.appendChild(document.createElement('br'));
+            graphView.appendChild(small);
         }
 
     }
@@ -156,12 +183,9 @@ function setForm(formState: DependencyGraphState) {
     exclude_otp.checked = formState.exclude_otp;
     starting.value = separateContent(formState.starting_nodes);
     excluded.value = separateContent(formState.exclude);
-    console.log("HELLOKA");
-    console.log(formState);
-    
-    
     excludedLib.value = separateContent(formState.exclude_lib);
     connection.value = separateContent(formState.connection);
+    outputType.value = formState.output_type;
 
     adjustLevelLabelsOnForm();
 }
@@ -188,3 +212,4 @@ generateButton.addEventListener('click', sendGraphRequest);
 window.addEventListener('message', handleExtensionMessages);
 
 adjustLevelLabelsOnForm();
+graphView.innerHTML = "";

@@ -1,17 +1,41 @@
 import * as vscode from 'vscode';
 import { WebSocketHandler } from './webSocketHandler';
-import { TextualGraph, DependencyGraphState, GraphResponse } from "./depgraphView/depgraph";
+import { TextualGraph, DependencyGraphState, GraphResponse, PathLike, ExtensionMessageParam, WebViewMessageCommands, WebViewMessageParam } from "./depgraphView/depgraph";
+import { throws } from 'assert';
 class ViewState {
-	public textualGraph: any;
-	public formState: DependencyGraphState | undefined;
+	graph: GraphState | undefined;
+	formState: DependencyGraphState | undefined
 }
+
+type GraphState =
+	{
+		status: "ok"
+		type: "svg",
+		path: PathLike,
+	}
+	|
+	{	
+		status: "ok",
+		type: "textual",
+		textualGraph: TextualGraph[],
+	}
+	|
+	{
+		status: "failed",
+		data: string
+	}
+
 export class DependencyGraphView {
 	public static currentPanel: DependencyGraphView | undefined;
 	public static readonly viewType = 'refactorErl';
 	private readonly panel: vscode.WebviewPanel;
 	private readonly extensionUri: vscode.Uri;
 	private _disposables: vscode.Disposable[] = [];
-	private state: ViewState;
+	private state!: ViewState;
+
+	private postMessage(param: ExtensionMessageParam) {
+		this.panel.webview.postMessage(param);
+	}
 
 	public static createOrShow(extensionUri: vscode.Uri) {
 		const column = vscode.window.activeTextEditor
@@ -40,9 +64,9 @@ export class DependencyGraphView {
 	}
 
 	private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
-		this.state = new ViewState();
 		this.panel = panel;
 		this.extensionUri = extensionUri;
+		this.state = new ViewState();
 
 		// Set the webview's initial html content
 		this.updateContent();
@@ -64,8 +88,8 @@ export class DependencyGraphView {
 
 		// Handle messages from the webview
 		this.panel.webview.onDidReceiveMessage(
-			async (message) => {
-				if (message.command == "dependencyGraph") {
+			async (message: WebViewMessageParam) => {
+				if (message.command == 'dependencyGraph') {
 					vscode.window.withProgress({
 						location: vscode.ProgressLocation.Notification,
 						title: `Generating dependeny graph`,
@@ -74,33 +98,46 @@ export class DependencyGraphView {
 						const responsePromise = WebSocketHandler.getInstance().request("dependencyGraph", message.params);
 						responsePromise.then(
 							(resolvedData: GraphResponse) => {
+								console.log(resolvedData);
 								if (resolvedData.status == "ok") {
 									if (resolvedData.type == "textual") {
 										this.setTextualGraph(resolvedData.data);
 									}
 									else if (resolvedData.type == "svg") {
-										const uri = vscode.Uri.file(resolvedData.data);
-										vscode.window.showInformationMessage(resolvedData.data);
-										vscode.commands.executeCommand('_svg.showSvgByUri', uri);
+										this.setSvgGraph(resolvedData.data);
+										this.openSvg(resolvedData.data);
 									}
 
 								}
-								else if (resolvedData.status == "error"){
+								else if (resolvedData.status == "failed") {
 									vscode.window.showErrorMessage(resolvedData.data);
-									this.panel.webview.postMessage({ command: 'textualGraphError', error: resolvedData.data });
+									this.postMessage({ command: 'textualGraphError', error: resolvedData.data });
+									this.state.graph = {
+										status: "failed",
+										data: resolvedData.data
+									};
 								}
 
 							},
 							(rejectCause) => {
 								vscode.window.showErrorMessage("Graph request error: " + rejectCause);
-								this.panel.webview.postMessage({ command: 'textualGraphError', error: "Graph request error: " + rejectCause });
+								const errorMsg = "Graph request error: " + rejectCause;
+								this.postMessage({ command: 'textualGraphError', error: errorMsg });
+								this.state.graph = {
+									status: "failed",
+									data: errorMsg
+								};
 							}
 						);
 						return responsePromise;
 					});
 				}
-				else if (message.command == "formState") {
+				else if (message.command == 'formState') {
 					this.state.formState = message.params;
+				}
+
+				else if (message.command == 'openSvg') {
+					this.openSvg(message.params);
 				}
 			},
 			null,
@@ -128,14 +165,54 @@ export class DependencyGraphView {
 		if (param) {
 			this.state.formState = param;
 			console.log(param);
-			this.panel.webview.postMessage({ command: 'setForm', data: param });
+			this.postMessage({ command: 'setForm', data: param });
 		}
 
 	}
 
-	public setTextualGraph(graph: any) {
-		this.state.textualGraph = graph;
-		this.panel.webview.postMessage({ command: 'printTextualGraph', graph: graph });
+	public setTextualGraph(graph: TextualGraph[]) {
+		this.state.graph = {
+			status: "ok",
+			type: "textual",
+			textualGraph: graph
+		};
+		this.postMessage({ command: 'printTextualGraph', graph: graph });
+	}
+
+	public setSvgGraph(graphPath: PathLike) {
+		this.state.graph = {
+			status: "ok",
+			type: "svg",
+			path: graphPath
+		};
+		this.postMessage({ command: 'svgGraphPath', path: graphPath });
+	}
+
+	private updateDataOnWebView() {
+		if (this.state) {
+			if (this.state.graph && this.state.graph.status == "ok") {
+				switch (this.state.graph.type) {
+					case "textual":
+						this.setTextualGraph(this.state.graph.textualGraph);
+						this.setForm(this.state.formState);
+						break;
+
+					case "svg":
+						this.setSvgGraph(this.state.graph.path);
+						this.setForm(this.state.formState);
+						break;
+
+					default:
+						break;
+				}
+			}
+
+			else if (this.state.graph?.status == "failed") {
+				this.postMessage({ command: 'textualGraphError', error: this.state.graph.data });
+				this.setForm(this.state.formState);
+			}
+		}
+
 	}
 
 	private async updateContent() {
@@ -143,6 +220,7 @@ export class DependencyGraphView {
 		this.panel.title = "RefactorErl: Dependencies";
 		const promise = this.getHtmlForWebview(webview);
 		this.panel.webview.html = await Promise.resolve(promise);
+		this.updateDataOnWebView();
 	}
 
 	private async getHtmlForWebview(webview: vscode.Webview) {
@@ -165,11 +243,6 @@ export class DependencyGraphView {
 
 		// Use a nonce to only allow specific scripts to be run
 		const nonce = DependencyGraphView.getNonce();
-
-		if (this.state.textualGraph) {
-			this.setTextualGraph(this.state.textualGraph);
-			this.setForm(this.state.formState);
-		}
 
 		return `
 		<!DOCTYPE html>
@@ -229,7 +302,7 @@ export class DependencyGraphView {
 							<label for="depgraph-excludedlib">Excluded libraries</label>
 							<input id="depgraph-excludedlib" type="text" name="depgraph-excludedlib" placeholder="/path/to/library/">
 
-							<label for="depgraph-output">Output format (??)</label>
+							<label for="depgraph-output">Output format</label>
 							<select name="depgraph-output" id="depgraph-output">
 								<option value="textual">Plain textual</option>
 								<option value="svg">SVG</option>
@@ -242,7 +315,7 @@ export class DependencyGraphView {
 						</form>
 					</td>
 					<td id="view-column">
-						
+						Please make sure that the window is activated and selected.
 					</td>
 				</tr>
 			</table>
@@ -268,6 +341,11 @@ export class DependencyGraphView {
 			text += possible.charAt(Math.floor(Math.random() * possible.length));
 		}
 		return text;
+	}
+
+	private openSvg(path: PathLike) {
+		const uri = vscode.Uri.file(path);
+		vscode.commands.executeCommand('_svg.showSvgByUri', uri);
 	}
 }
 

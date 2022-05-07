@@ -1,3 +1,6 @@
+/**
+ * Common type definitions for the Extension backend and the Webview. 
+ */
 
 export type TextualGraph = {
 	dependant: string,
@@ -6,23 +9,23 @@ export type TextualGraph = {
 
 export type PathLike = string
 
-export type GraphResponse = 
-{
-	status: "ok",
-	data: PathLike,
-	type: "svg"
-} 
-	| 
-{
-	status: "ok",
-	data: TextualGraph,
-	type: "textual" 
-} 
+export type GraphResponse =
+	{
+		status: "ok",
+		data: PathLike,
+		type: "svg"
+	}
 	|
-{
-	status: "error",
-	data: string,
-}
+	{
+		status: "ok",
+		data: TextualGraph[],
+		type: "textual"
+	}
+	|
+	{
+		status: "failed",
+		data: string,
+	}
 
 
 export type DependencyGraphState = {
@@ -35,5 +38,33 @@ export type DependencyGraphState = {
 	connection: string[],
 	output_type: string
 }
+export type ExtensionMessageCommands = 'updateResponse' | 'printTextualGraph' | 'textualGraphError' | 'setForm' | 'svgGraphPath'
+
+export type ExtensionMessageParam = {
+	command: ExtensionMessageCommands,
+	graph?: TextualGraph[],
+	error?: string,
+	data?: any,
+	path?: PathLike
+}
+
+export type WebViewMessageCommands = 'dependencyGraph' | 'formState' | 'openSvg';
+
+
+	export type WebViewMessageParam =
+	{
+		command: 'dependencyGraph',
+		params: DependencyGraphState
+	}
+	|
+	{
+		command: 'formState',
+		params: DependencyGraphState
+	}
+	|
+	{
+		command: 'openSvg',
+		params: PathLike
+	}
 
 
