@@ -76,6 +76,11 @@
 				"view": "variableView",
 				"contents": "Try setting to coursor into a varialbe and use the Code Action (small lamps) to execute. \n\n The result will appear here.",
 				"when": "!refactorErl.treeViewActive"
+			},
+			{
+				"view": "customQuery",
+				"contents": "Open up Command Palette and search for \"RefactorErl: Custom Query\" hit enter and type your query",
+				"when": "!refactorErl.treeViewActive"
 			}
 		]
 	},
