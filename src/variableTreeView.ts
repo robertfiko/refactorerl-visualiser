@@ -18,7 +18,6 @@ export class VariableViewProvider extends ReferlProvider<VarialbeDataStorage> {
 
 		// Filling up children
 		if (element) {
-			const parent = element.label;
 			const items = this.data.items();
 			const displayItems = new Array<SubTreeItem>();
 
@@ -31,9 +30,9 @@ export class VariableViewProvider extends ReferlProvider<VarialbeDataStorage> {
 			return Promise.resolve(displayItems);
 		}
 
-		// Module name is sent as root element
+		// Root element needs to determined
 		else {
-			if (module) {
+			if (variableName) {
 				return Promise.resolve([new ReferlTreeItem(variableName, "", vscode.TreeItemCollapsibleState.Collapsed)]);
 			}
 			else {
