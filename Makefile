@@ -20,3 +20,7 @@ visualiser:
 
 remove:
 	code --uninstall-extension robert-fiko.refactorerl-visualizer --force
+
+clean:
+	rm -rf out
+	rm -rf media/webview/out
