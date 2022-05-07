@@ -100,5 +100,6 @@
 		"fs": "^0.0.1-security",
 		"uuid": "^8.3.2",
 		"ws": "^8.5.0"
-	}
+	},
+	"extensionDependencies": ["jock.svg"]
 }

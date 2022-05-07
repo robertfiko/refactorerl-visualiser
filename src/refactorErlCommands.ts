@@ -34,6 +34,8 @@ export class RefactorErlCommands {
 
 			vscode.commands.registerCommand('refactorErl.databaseSync', () => {
 				vscode.window.showInformationMessage("SYNC");
+				const uri = vscode.Uri.file("/Users/fikorobert/Projects/referl_svn/fiko/tool/data/referl@fikoMac-1651_916823_85418_vscode_graph.svg");
+				vscode.commands.executeCommand('_svg.showSvgByUri', uri);
 			})
 			
 		];

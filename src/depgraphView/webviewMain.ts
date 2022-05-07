@@ -1,7 +1,7 @@
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
 
-import { TextualGraph, TextualGraphState } from "./depgraph";
+import { TextualGraph, DependencyGraphState } from "./depgraph";
 
 const vscode = acquireVsCodeApi();
 const oldState = (vscode.getState());
@@ -19,7 +19,7 @@ const connection = document.getElementById('depgraph-connection') as HTMLInputEl
 const excluded = document.getElementById('depgraph-excluded') as HTMLInputElement;
 const exclude_otp = document.getElementById('exclude-otp') as HTMLInputElement;
 const excludedLib = document.getElementById('depgraph-excludedlib') as HTMLInputElement;
-const outputFormat = document.getElementById('depgraph-output') as HTMLInputElement;
+const outputFormat = document.getElementById('depgraph-output') as HTMLSelectElement;
 
 /* Buttons */
 const generateButton = (document.getElementById('graph-properties-generate')) as HTMLButtonElement;
@@ -54,14 +54,15 @@ function sendGraphRequest(event: MouseEvent) {
     const connectionValue = semicolonSeparatedToArray(connection.value);
 
     console.log(exclude_otp);
-    const graphParams = {
+    const graphParams: DependencyGraphState = {
         type: type.value,
         level: level.value,
         starting_nodes: startingValue,
         exclude_otp: exclude_otp.checked,
         exclude: excludeValue,
         exclude_lib: excludeLibValue,
-        connection: connectionValue
+        connection: connectionValue,
+        output_type: outputFormat.value
     };
     console.log(graphParams);
 
@@ -149,7 +150,7 @@ function adjustLevelLabelsOnForm() {
     }
 }
 
-function setForm(formState: TextualGraphState) {
+function setForm(formState: DependencyGraphState) {
     level.value = formState.level;
     type.value = formState.type;
     exclude_otp.checked = formState.exclude_otp;

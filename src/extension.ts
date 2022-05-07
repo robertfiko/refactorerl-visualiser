@@ -65,10 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
 	
 						const response = WebSocketHandler.getInstance().request('customQueryRequest', result);
 						response.then(
-							(value) => {
-								console.log("SAJT");
-								console.log(value);
-								
+							(value) => {								
 								
 								if (value.status == "ok") {
 									vscode.window.showInformationMessage(`Done: ${result} `);
@@ -99,6 +96,8 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 			}
 		}));
+
+		
 	}
 
 }
