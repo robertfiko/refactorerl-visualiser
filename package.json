@@ -64,12 +64,12 @@
 		"viewsWelcome": [
 			{
 				"view": "referlDashboard",
-				"contents": "RefactorErl: 🟢  Online \n [Check connection](command:refactorErl.checkConnection) \n [Database Synch](command:refactorErl.databaseSync) \n [Run dynamic analysis](command:refactorErl.dynamicAnal) [Clear dynamic analysis](command:refactorErl.dynamicAnal)",
+				"contents": "RefactorErl:  🟢  Online \n [Check connection](command:refactorErl.checkConnection) \n [Database Synch](command:refactorErl.databaseSync) \n [Run dynamic analysis](command:refactorErl.dynamicAnal) \n [Clear dynamic analysis](command:refactorErl.dynamicClear) \n Please note that this extension works the best, if you preconfigure RefactorErl. For further information on this, please see the [Wiki page on managing fles](http://pnyf.inf.elte.hu/trac/refactorerl/wiki/ManagingFiles) ",
 				"when": "refactorErl.nodeReachable"
 			},
 			{
 				"view": "referlDashboard",
-				"contents": "RefactorErl: 🔴  Not reachable \n RefactorErl is using WebSocket, to deliver content. It seems the connection is down. \n[Try again](command:refactorErl.tryAgainConnect)",
+				"contents": "RefactorErl:  🔴  Not reachable \n RefactorErl is using WebSocket, to deliver content. It seems the connection is down. \n[Try again](command:refactorErl.tryAgainConnect)",
 				"when": "!refactorErl.nodeReachable"
 			},
 			{

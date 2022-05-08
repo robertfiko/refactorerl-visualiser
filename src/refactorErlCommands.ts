@@ -91,7 +91,40 @@ export class RefactorErlCommands {
 							}
 
 						},
-						(error) => { vscode.window.showErrorMessage(`Synchronisation timeout`); }
+						(error) => { vscode.window.showErrorMessage(`Dynamic analysis timeout`); }
+					);
+
+					return response;
+				});
+			}),
+
+			vscode.commands.registerCommand('refactorErl.dynamicClear', () => {
+				vscode.window.withProgress({
+					location: vscode.ProgressLocation.Notification,
+					title: `Clearing started`,
+					cancellable: false
+				}, (progress) => {
+
+					const response = WebSocketHandler.getInstance().request('dynamicClear', '');
+					response.then(
+						(value) => {								
+							if (value == "ok") {
+								vscode.window.showInformationMessage(`Clearing finished`);
+							}
+							else if (value == "failed") {
+								vscode.window.showErrorMessage(`Clearing failed`);
+							}
+
+							else if (value == "busy") {
+								vscode.window.showErrorMessage(`Clearing is not possible, please try again later (another request is running!)`);
+							}
+
+							else {
+								vscode.window.showErrorMessage(`Clearing failed due unkown reason.`);
+							}
+
+						},
+						(error) => { vscode.window.showErrorMessage(`Clearing timeout`); }
 					);
 
 					return response;
