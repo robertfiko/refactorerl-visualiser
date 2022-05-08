@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { CustomQueryProvider } from './customQuery';
 import { DependencyGraphView } from './dependencyGraphView';
-import { VariableViewProvider } from './variableTreeView';
+import { BuiltInQViewProvider } from './builtInQTreeView';
 import { WebSocketHandler } from './webSocketHandler';
 import { RefactorErlCommands } from './refactorErlCommands';
 
@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// If there is an opened workspace, than activate
 	if (workspaceUri) {
 		//Providers
-		const variableViewProvider = new VariableViewProvider();
+		const variableViewProvider = new BuiltInQViewProvider();
 		vscode.window.registerTreeDataProvider('variableView', variableViewProvider);
 		
 		const customQueryProvider = new CustomQueryProvider();

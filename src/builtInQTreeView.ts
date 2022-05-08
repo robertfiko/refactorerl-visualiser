@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { DataStorage, RangeCommand, RangeDescriptor, ReferlProvider, ReferlTreeItem, ResponseItem } from './refactorErlTreeView';
-export class VariableViewProvider extends ReferlProvider<VarialbeDataStorage> {
-	protected data: VarialbeDataStorage;
+export class BuiltInQViewProvider extends ReferlProvider<BuiltInQDataStorage> {
+	protected data: BuiltInQDataStorage;
 
 	constructor() {
 		super();
-		this.data = new VarialbeDataStorage();
+		this.data = new BuiltInQDataStorage();
 	}
 
 	getTreeItem(element: SubTreeItem): vscode.TreeItem {
@@ -61,13 +61,13 @@ export class SubTreeItem extends ReferlTreeItem {
 	}
 }
 
-type VariableDataResponse = {
+type BuiltInQDataResponse = {
 	items: ResponseItem[]
 	variableName: string
 }
 
-class VarialbeDataStorage implements DataStorage {
-	private data!: VariableDataResponse;
+class BuiltInQDataStorage implements DataStorage {
+	private data!: BuiltInQDataResponse;
 
 
 	public updateData(data: any) {

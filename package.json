@@ -16,7 +16,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onView:variableView",
+		"onView:builtinView",
 		"onView:referlDashboard",
 		"onCommand:refactorErl.dependencyGraph",
 		"onCommand:refactorErl.query",
@@ -52,8 +52,8 @@
 					"name": "RefactorErl dashboard"
 				},
 				{
-					"id": "variableView",
-					"name": "Variable Origin & Reach"
+					"id": "builtinView",
+					"name": "Built-In Query"
 				},
 				{
 					"id": "customQuery",
@@ -64,7 +64,7 @@
 		"viewsWelcome": [
 			{
 				"view": "referlDashboard",
-				"contents": "RefactorErl: 🟢  Online \n [Check connection](command:refactorErl.checkConnection) \n [Database Synch](command:refactorErl.databaseSync)",
+				"contents": "RefactorErl: 🟢  Online \n [Check connection](command:refactorErl.checkConnection) \n [Database Synch](command:refactorErl.databaseSync) \n [Run dynamic analysis](command:refactorErl.dynamicAnal) [Clear dynamic analysis](command:refactorErl.dynamicAnal)",
 				"when": "refactorErl.nodeReachable"
 			},
 			{
@@ -73,7 +73,7 @@
 				"when": "!refactorErl.nodeReachable"
 			},
 			{
-				"view": "variableView",
+				"view": "builtinView",
 				"contents": "Try setting to coursor into a varialbe and use the Code Action (small lamps) to execute. \n\n The result will appear here.",
 				"when": "!refactorErl.treeViewActive"
 			},

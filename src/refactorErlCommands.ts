@@ -2,14 +2,14 @@ import * as vscode from 'vscode';
 import { CustomQueryProvider } from './customQuery';
 import { NoPosDescriptor, RangeDescriptor } from './refactorErlTreeView';
 import { DependencyGraphView } from './dependencyGraphView';
-import { VariableViewProvider } from './variableTreeView';
+import { BuiltInQViewProvider } from './builtInQTreeView';
 import { WebSocketHandler } from './webSocketHandler';
 
 export class RefactorErlCommands {
 	static setCommandForContext(context: vscode.ExtensionContext): void {
 		const commands = [
 			vscode.commands.registerCommand('variableView.goToLocation', (item: RangeDescriptor) => {
-				VariableViewProvider.selectTreeItem(item);
+				BuiltInQViewProvider.selectTreeItem(item);
 			}),
 
 			vscode.commands.registerCommand('customQuery.noPosNotify', (item: NoPosDescriptor) => {
@@ -33,7 +33,69 @@ export class RefactorErlCommands {
 			}),
 
 			vscode.commands.registerCommand('refactorErl.databaseSync', () => {
-				vscode.window.showInformationMessage("SYNC");
+				vscode.window.withProgress({
+					location: vscode.ProgressLocation.Notification,
+					title: `Synchronisation started`,
+					cancellable: false
+				}, (progress) => {
+
+					const response = WebSocketHandler.getInstance().request('databaseSync', '');
+					response.then(
+						(value) => {								
+							if (value == "ok") {
+								vscode.window.showInformationMessage(`Synchronisation finished`);
+							}
+							else if (value == "failed") {
+								vscode.window.showErrorMessage(`Synchronisation failed`);
+							}
+
+							else if (value == "busy") {
+								vscode.window.showErrorMessage(`Synchronisation is not possible, please try again later (another request is running!)`);
+							}
+
+							else {
+								vscode.window.showErrorMessage(`Synchronisation failed due unkown reason.`);
+							}
+
+						},
+						(error) => { vscode.window.showErrorMessage(`Synchronisation timeout`); }
+					);
+
+					return response;
+				});
+			}),
+
+			vscode.commands.registerCommand('refactorErl.dynamicAnal', () => {
+				vscode.window.withProgress({
+					location: vscode.ProgressLocation.Notification,
+					title: `Dynamic analysis started`,
+					cancellable: false
+				}, (progress) => {
+
+					const response = WebSocketHandler.getInstance().request('dynamicAnal', '');
+					response.then(
+						(value) => {								
+							if (value == "ok") {
+								vscode.window.showInformationMessage(`Dynamic analysis finished`);
+							}
+							else if (value == "failed") {
+								vscode.window.showErrorMessage(`Dynamic analysis failed`);
+							}
+
+							else if (value == "busy") {
+								vscode.window.showErrorMessage(`Dynamic analysis is not possible, please try again later (another request is running!)`);
+							}
+
+							else {
+								vscode.window.showErrorMessage(`Dynamic analysis failed due unkown reason.`);
+							}
+
+						},
+						(error) => { vscode.window.showErrorMessage(`Synchronisation timeout`); }
+					);
+
+					return response;
+				});
 			})
 			
 		];
