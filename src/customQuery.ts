@@ -56,10 +56,7 @@ export class CustomQueryProvider extends ReferlProvider<CustomQueryDataStorage> 
 
 					const response = WebSocketHandler.getInstance().request('customQueryRequest', result);
 					response.then(
-						(value) => {
-							console.log("SAJT");
-							console.log(value);
-							
+						(value) => {							
 							
 							if (value.status == "ok") {
 								vscode.window.showInformationMessage(`Done: ${result} `);

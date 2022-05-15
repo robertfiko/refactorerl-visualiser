@@ -101,6 +101,7 @@ function handleExtensionMessages(event: MessageEvent) {
             break;
         }
         case 'setForm': {
+            console.log(message.data);
             setForm(message.data);
             break;
         }

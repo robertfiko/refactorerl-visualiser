@@ -40,6 +40,10 @@ export class WebSocketHandler {
 		return this._socketConnected;
 	}
 
+	public isConnected() {
+		return this.socketConnected;
+	}
+
 	/**
 	 * Establishes a connection to the server.
 	 * @returns A Promise object. If resolved it contains the instance

@@ -17,19 +17,23 @@ export function activate(context: vscode.ExtensionContext) {
 	// If there is an opened workspace, than activate
 	if (workspaceUri) {
 		//Providers
-		const variableViewProvider = new BuiltInQViewProvider();
-		vscode.window.registerTreeDataProvider('variableView', variableViewProvider);
+		const builtinViewProvider = new BuiltInQViewProvider();
+		vscode.window.registerTreeDataProvider('builtinView', builtinViewProvider);
 		
 		const customQueryProvider = new CustomQueryProvider();
 		vscode.window.registerTreeDataProvider('customQuery', customQueryProvider);
 		
 		// WebSocket subscriptions
-		WebSocketHandler.getInstance().subscribe('variableView', (eventData) => { 
-			variableViewProvider.refresh(eventData); 
+		WebSocketHandler.getInstance().subscribe('builtinView', (eventData) => { 
+			builtinViewProvider.refresh(eventData); 
 		});
 
 		WebSocketHandler.getInstance().subscribe('dependencyGraph', (data) => {
 			DependencyGraphView.createOrShow(context.extensionUri);
+			console.log("depg");
+			
+			console.log(DependencyGraphView.currentPanel);
+			
 			DependencyGraphView.currentPanel?.setForm(data.params);
 			DependencyGraphView.currentPanel?.setTextualGraph(data.data.data);
 		});
@@ -52,6 +56,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 		// Custom query dialog hookup
 		context.subscriptions.push(vscode.commands.registerCommand('refactorErl.query',async () => {
+			if (!WebSocketHandler.getInstance().isConnected()) {
+				vscode.window.showErrorMessage("Not connected to RefactorErl. Checn connection with WebSocket and try again.");
+				return;
+			}
 			{
 				const result = await vscode.window.showInputBox({
 					placeHolder: 'Enter a query, for example: `mods.funs`',

@@ -8,7 +8,7 @@ import { WebSocketHandler } from './webSocketHandler';
 export class RefactorErlCommands {
 	static setCommandForContext(context: vscode.ExtensionContext): void {
 		const commands = [
-			vscode.commands.registerCommand('variableView.goToLocation', (item: RangeDescriptor) => {
+			vscode.commands.registerCommand('builtinView.goToLocation', (item: RangeDescriptor) => {
 				BuiltInQViewProvider.selectTreeItem(item);
 			}),
 
