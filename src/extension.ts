@@ -92,7 +92,7 @@ export function activate(context: vscode.ExtensionContext) {
 								}
 								else {
 									console.log(value);
-									vscode.window.showErrorMessage(`Error with request: ${result} `);
+									vscode.window.showErrorMessage(`${result}: ${value.data} `);
 								}
 	
 							},

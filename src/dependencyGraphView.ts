@@ -274,7 +274,6 @@ export class DependencyGraphView {
 							<select name="depgraph-level" id="depgraph-level">
 								<option value="func">Function</option>
 								<option value="mod">Module</option>
-								<option value="moduleset">Set of modules (!!)</option>
 							</select>
 
 							<label for="depgraph-type">Type</label>
