@@ -98,11 +98,7 @@ class CustomQueryDataStorage implements DataStorage {
 		return "";
 	}
 	
-	public files(): string[] {
-		console.log("XD");
-		
-		console.log(this.data);
-		
+	public files(): string[] {		
 		if (this.valid()) {
 			const items = [];
 			for (const item of this.data.response) {

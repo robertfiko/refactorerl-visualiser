@@ -10,7 +10,7 @@ export class WebSocketHandler {
 	private reqIdsubs: Map<string, (param: any) => void>;
 	private uri: string;
 	private vsOutput: vscode.OutputChannel;
-	private tryingToConnect;
+	private tryingToConnect: boolean;
 	private runningPromise: Promise<any> | undefined;
 
 	private _socketConnected: boolean;
@@ -27,7 +27,6 @@ export class WebSocketHandler {
 		this.reqIdsubs = new Map<string, ((param: any) => void)>();
 		this.uri = 'ws://127.0.0.1:8002/vsc_api.yaws';
 
-		//this.socket = new WebSocket(this.uri); //todo: this creates a second WS
 		this.connect();
 	}
 

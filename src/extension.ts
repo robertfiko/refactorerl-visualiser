@@ -29,9 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 
 		WebSocketHandler.getInstance().subscribe('dependencyGraph', (data) => {
-			DependencyGraphView.createOrShow(context.extensionUri);
-			console.log("depg");
-			
+			DependencyGraphView.createOrShow(context.extensionUri);			
 			console.log(DependencyGraphView.currentPanel);
 			
 			DependencyGraphView.currentPanel?.setForm(data.params);
