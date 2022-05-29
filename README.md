@@ -2,6 +2,8 @@
 
 [![Lines Of Code](https://tokei.rs/b1/github/robertfiko/refactorerl-visualiser?category=code)](https://github.com/robertfiko/refactorerl-visualiser)
 
+Telepíthető a `refactorerl-visualizer-0.0.1.vsix` állományból is.
+
 RefactorErl visualiser is a Visual Studio Code plugin, which works well with Erlang LS and RefactorErl. 
 
 (**Ref**actor Erl and **E**rlang **LS** ~ refels)
